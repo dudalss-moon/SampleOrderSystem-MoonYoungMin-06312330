@@ -82,4 +82,17 @@ class ReleaseServiceTest {
 
         assertEquals(5, order.getSample().getStock());
     }
+
+    @Test
+    @DisplayName("CONFIRMED 상태가 아닌 주문을 release하면 IllegalStateException이 발생한다")
+    void CONFIRMED_아닌_주문_출고_예외() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 10);
+        sampleRepository.save(sample);
+        String orderId = orderRepository.generateId();
+        Order reserved = new Order(orderId, sample, "홍길동", 3);
+        orderRepository.save(reserved); // RESERVED 상태
+
+        assertThrows(IllegalStateException.class,
+            () -> releaseService.release(orderId));
+    }
 }
