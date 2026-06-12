@@ -36,6 +36,19 @@ class JdbcSampleRepositoryTest {
     }
 
     @Test
+    @DisplayName("addStock 후 save하면 DB의 stock 값이 갱신된다")
+    void 재고_변경_DB_반영() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 5);
+        repository.save(sample);
+
+        sample.addStock(3);
+        repository.save(sample);
+
+        Sample found = repository.findById("S001").orElseThrow();
+        assertEquals(8, found.getStock());
+    }
+
+    @Test
     @DisplayName("save 후 findById로 동일한 시료가 반환된다")
     void 시료_저장_후_ID로_조회() {
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 10);
