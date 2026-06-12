@@ -95,4 +95,11 @@ class ReleaseServiceTest {
         assertThrows(IllegalStateException.class,
             () -> releaseService.release(orderId));
     }
+
+    @Test
+    @DisplayName("존재하지 않는 주문 ID로 release 호출 시 IllegalArgumentException이 발생한다")
+    void 존재하지않는_주문_출고_예외() {
+        assertThrows(IllegalArgumentException.class,
+            () -> releaseService.release("NONE"));
+    }
 }
