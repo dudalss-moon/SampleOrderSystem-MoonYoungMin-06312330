@@ -15,6 +15,7 @@ public final class ConsoleMenu {
     private final SampleUI sampleUI;
     private final OrderUI orderUI;
     private final MonitorUI monitorUI;
+    private final ProductionUI productionUI;
 
     public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository) {
         this.input = input;
@@ -23,6 +24,7 @@ public final class ConsoleMenu {
         ProductionService productionService = new ProductionService(new ProductionQueueRepository(), orderRepository);
         this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), productionService, input);
         this.monitorUI = new MonitorUI(new MonitorService(orderRepository, sampleRepository), input);
+        this.productionUI = new ProductionUI(productionService, input);
     }
 
     public void run() {
@@ -69,7 +71,7 @@ public final class ConsoleMenu {
             case 2 -> orderUI.show();
             case 3 -> monitorUI.show();
             case 4 -> System.out.println("[출고 처리] - 준비 중");
-            case 5 -> System.out.println("[생산 라인] - 준비 중");
+            case 5 -> productionUI.show();
             default -> System.out.println("올바른 메뉴를 선택해주세요.");
         }
     }
