@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +27,8 @@ public final class JdbcProductionQueueRepository implements ProductionQueueRepos
     @Override
     public void enqueue(ProductionJob job) {
         String sql = """
-            MERGE INTO production_jobs (job_id, order_id, target_qty, produced_qty, total_time)
-            KEY (job_id) VALUES (?, ?, ?, ?, ?)
+            MERGE INTO production_jobs (job_id, order_id, target_qty, produced_qty, total_time, start_time)
+            KEY (job_id) VALUES (?, ?, ?, ?, ?, ?)
             """;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, job.getJobId());
@@ -35,6 +36,7 @@ public final class JdbcProductionQueueRepository implements ProductionQueueRepos
             ps.setInt(3, job.getTargetQty());
             ps.setInt(4, job.getProducedQty());
             ps.setInt(5, job.getTotalTime());
+            ps.setTimestamp(6, job.getStartTime() != null ? Timestamp.from(job.getStartTime()) : null);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException("작업 저장 실패: " + e.getMessage(), e);
@@ -88,7 +90,7 @@ public final class JdbcProductionQueueRepository implements ProductionQueueRepos
     }
 
     private List<ProductionJob> loadAll() {
-        String sql = "SELECT job_id, order_id, target_qty, produced_qty, total_time FROM production_jobs ORDER BY enqueue_order";
+        String sql = "SELECT job_id, order_id, target_qty, produced_qty, total_time, start_time FROM production_jobs ORDER BY enqueue_order";
         List<ProductionJob> result = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -103,6 +105,10 @@ public final class JdbcProductionQueueRepository implements ProductionQueueRepos
                     rs.getInt("produced_qty"),
                     rs.getInt("total_time")
                 );
+                Timestamp startTime = rs.getTimestamp("start_time");
+                if (startTime != null) {
+                    job.setStartTime(startTime.toInstant());
+                }
                 result.add(job);
             }
         } catch (SQLException e) {

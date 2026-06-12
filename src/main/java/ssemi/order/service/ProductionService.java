@@ -96,6 +96,7 @@ public final class ProductionService {
 
         if (job.getStartTime() == null) {
             job.setStartTime(Instant.now());
+            productionQueueRepo.enqueue(job);  // startTime DB 반영
             return;
         }
 
@@ -104,11 +105,15 @@ public final class ProductionService {
 
         if (newProduced > job.getProducedQty()) {
             job.produce(newProduced - job.getProducedQty());
+            productionQueueRepo.enqueue(job);  // producedQty DB 반영
         }
 
         if (job.isCompleted()) {
             completeJob(job);
-            productionQueueRepo.peek().ifPresent(next -> next.setStartTime(Instant.now()));
+            productionQueueRepo.peek().ifPresent(next -> {
+                next.setStartTime(Instant.now());
+                productionQueueRepo.enqueue(next);  // 다음 작업 startTime DB 반영
+            });
         }
     }
 }

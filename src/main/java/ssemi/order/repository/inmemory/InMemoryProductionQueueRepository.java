@@ -15,7 +15,10 @@ public final class InMemoryProductionQueueRepository implements ProductionQueueR
 
     @Override
     public void enqueue(ProductionJob job) {
-        queue.add(job);
+        boolean alreadyQueued = queue.stream().anyMatch(j -> j.getJobId().equals(job.getJobId()));
+        if (!alreadyQueued) {
+            queue.add(job);
+        }
     }
 
     @Override
