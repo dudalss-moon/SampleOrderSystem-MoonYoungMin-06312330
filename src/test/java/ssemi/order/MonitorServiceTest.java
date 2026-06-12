@@ -10,6 +10,8 @@ import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.service.MonitorService;
 
+import ssemi.order.domain.SampleStockInfo;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,16 @@ class MonitorServiceTest {
         Order order = new Order(orderId, sampleRepository.findById(sampleId).get(), customer, qty);
         orderRepository.save(order);
         return order;
+    }
+
+    @Test
+    @DisplayName("getStockInfos는 등록된 모든 시료에 대한 SampleStockInfo를 반환한다")
+    void 재고현황_전체_시료_포함() {
+        sampleRepository.save(new Sample("S002", "베타칩", 20, 0.8, 5));
+
+        List<SampleStockInfo> infos = monitorService.getStockInfos();
+
+        assertEquals(2, infos.size());
     }
 
     @Test
