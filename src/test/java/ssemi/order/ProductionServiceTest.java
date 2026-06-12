@@ -101,4 +101,17 @@ class ProductionServiceTest {
         assertThrows(IllegalStateException.class,
             () -> productionService.processProduction(5));
     }
+
+    @Test
+    @DisplayName("targetQty를 초과하는 수량 입력 시 targetQty로 보정된다")
+    void 생산량_초과_입력_처리() {
+        ProductionJob job = enqueueJob("S001", 0, 4); // targetQty=ceil(4/0.81)=5
+
+        ProductionResult result = productionService.processProduction(100);
+
+        assertAll(
+            () -> assertEquals(job.getTargetQty(), job.getProducedQty()),
+            () -> assertTrue(result.isCompleted())
+        );
+    }
 }
