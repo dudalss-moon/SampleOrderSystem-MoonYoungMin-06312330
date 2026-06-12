@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase5 완료)
+> 최종 업데이트: 2026-06-12 (Phase6 완료)
 
 ## 전체 진행률
 
@@ -10,7 +10,7 @@ Phase2 ██████████ 완료
 Phase3 ██████████ 완료
 Phase4 ██████████ 완료
 Phase5 ██████████ 완료
-Phase6 ░░░░░░░░░░ 미시작
+Phase6 ██████████ 완료
 Phase7 ░░░░░░░░░░ 미시작
 ```
 
@@ -203,27 +203,35 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase6 — 생산라인 `미시작`
+### ✅ Phase6 — 생산라인 `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase6.md](docs/design/Phase6.md) |
-| 테스트 | 0 / 9 |
+| 테스트 | 9 / 9 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `service/ProductionService.java` | getCurrentJob / processProduction / completeJob |
-| `domain/ProductionResult.java` | 생산 결과 DTO |
-| `ui/ProductionUI.java` | 생산라인 화면 |
+| `service/ProductionService.java` | `processProduction()` / `completeJob()` 구현 |
+| `domain/ProductionResult.java` | 생산 결과 DTO (completed, job) |
+| `ui/ProductionUI.java` | 현재 생산 현황 / 대기 목록 / 생산 진행 화면 |
+| `ui/ConsoleMenu.java` | 메뉴 5번 ProductionUI 라우팅 연결 |
 
-**예정 테스트 케이스 (9건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `ProductionServiceTest` | 7 | 미완료/완료 처리, 재고증가, CONFIRMED 전환, FIFO |
-| 통합 시나리오 | 2 | 재고부족 전체 흐름, 복수 큐 처리 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `ProductionServiceTest` | `생산_진행_미완료` | ✅ PASS |
+| 2 | `ProductionServiceTest` | `생산_진행_완료_재고증가` | ✅ PASS |
+| 3 | `ProductionServiceTest` | `생산_완료_주문상태_CONFIRMED` | ✅ PASS |
+| 4 | `ProductionServiceTest` | `생산_완료_큐에서_제거` | ✅ PASS |
+| 5 | `ProductionServiceTest` | `생산_완료_다음_작업_자동시작` | ✅ PASS |
+| 6 | `ProductionServiceTest` | `생산_큐_없을때_진행_예외` | ✅ PASS |
+| 7 | `ProductionServiceTest` | `생산량_초과_입력_처리` | ✅ PASS |
+| 8 | `ProductionServiceTest` | `재고부족_승인_후_생산_완료` | ✅ PASS |
+| 9 | `ProductionServiceTest` | `복수_생산_큐_FIFO_처리` | ✅ PASS |
 
 ---
 
@@ -260,9 +268,9 @@ Phase7 ░░░░░░░░░░ 미시작
 | Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 13 | 13 | 100% |
 | Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 12 | 12 | 100% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 11 | 11 | 100% |
-| Phase6 | `ProductionServiceTest` | 0 | 9 | 0% |
+| Phase6 | `ProductionServiceTest` | 9 | 9 | 100% |
 | Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **60** | **81** | **74%** |
+| **합계** | | **69** | **81** | **85%** |
 
 ---
 

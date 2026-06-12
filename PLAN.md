@@ -14,7 +14,7 @@
 | Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
-| Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 진행중 |
+| Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 미시작 |
 
 ## 아키텍처 원칙
