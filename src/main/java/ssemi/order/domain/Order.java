@@ -19,6 +19,7 @@ public final class Order {
     private final String customerName;
     private final int quantity;
     private OrderStatus status;
+    private boolean stockDeducted;
 
     public Order(String orderId, Sample sample, String customerName, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("주문 수량은 1 이상이어야 합니다.");
@@ -28,6 +29,7 @@ public final class Order {
         this.customerName = customerName;
         this.quantity = quantity;
         this.status = OrderStatus.RESERVED;
+        this.stockDeducted = false;
     }
 
     public void changeStatus(OrderStatus newStatus) {
@@ -43,4 +45,6 @@ public final class Order {
     public String getCustomerName() { return customerName; }
     public int getQuantity() { return quantity; }
     public OrderStatus getStatus() { return status; }
+    public boolean isStockDeducted() { return stockDeducted; }
+    public void markStockDeducted() { this.stockDeducted = true; }
 }

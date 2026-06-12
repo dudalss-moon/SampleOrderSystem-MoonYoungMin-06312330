@@ -15,7 +15,7 @@
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
-| Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 미시작 |
+| Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 진행중 |
 
 ## 아키텍처 원칙
 - 계층 구조: `ui` → `service` → `domain` → `repository`
@@ -531,3 +531,90 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** job1, job2 enqueue 후 job1 완료 → job2 완료
 - **기대 결과:** job1 order CONFIRMED → job2 order CONFIRMED, 큐 비어있음
 - **커버 요구사항:** Phase6.md § ProductionService > FIFO 처리
+
+---
+
+## Phase7 TDD 계획
+
+### [OrderTest] 사이클 1: stockDeducted 플래그 기본값 false
+- **메서드명:** `stockDeducted_기본값_false`
+- **@DisplayName:** `"Order 생성 시 stockDeducted 기본값은 false다"`
+- **입력:** Order 생성
+- **기대 결과:** `order.isStockDeducted() == false`
+- **커버 요구사항:** Phase7.md § Order > stockDeducted
+
+### [OrderTest] 사이클 2: markStockDeducted 호출 후 true
+- **메서드명:** `markStockDeducted_호출_후_true`
+- **@DisplayName:** `"markStockDeducted() 호출 후 isStockDeducted()는 true를 반환한다"`
+- **기대 결과:** `order.isStockDeducted() == true`
+- **커버 요구사항:** Phase7.md § Order > markStockDeducted()
+
+### [ReleaseServiceTest] 사이클 3: CONFIRMED 주문 목록 조회
+- **메서드명:** `CONFIRMED_주문_목록_조회`
+- **@DisplayName:** `"findConfirmed는 CONFIRMED 상태 주문만 반환한다"`
+- **입력:** CONFIRMED 2건, RESERVED 1건 등록
+- **기대 결과:** 크기 2, 모두 CONFIRMED 상태
+- **커버 요구사항:** Phase7.md § ReleaseService > findConfirmed()
+
+### [ReleaseServiceTest] 사이클 4: 출고 처리 RELEASE 전환
+- **메서드명:** `출고_처리_RELEASE_전환`
+- **@DisplayName:** `"release() 호출 시 주문 상태가 RELEASE로 변경된다"`
+- **입력:** CONFIRMED 주문 → release(orderId)
+- **기대 결과:** `order.getStatus() == RELEASE`
+- **커버 요구사항:** Phase7.md § ReleaseService > release()
+
+### [ReleaseServiceTest] 사이클 5: 재고 부족 경로 출고 재고 차감
+- **메서드명:** `재고부족_경로_출고_재고차감`
+- **@DisplayName:** `"stockDeducted=false인 CONFIRMED 주문 출고 시 sample.stock이 차감된다"`
+- **입력:** stock=5, quantity=3, stockDeducted=false → release()
+- **기대 결과:** `sample.getStock() == 2`
+- **커버 요구사항:** Phase7.md § 출고 처리 규칙 > 재고 부족 경로
+
+### [ReleaseServiceTest] 사이클 6: 재고 충분 경로 출고 차감 없음
+- **메서드명:** `재고충분_경로_출고_차감없음`
+- **@DisplayName:** `"stockDeducted=true인 CONFIRMED 주문 출고 시 stock이 차감되지 않는다"`
+- **입력:** stock=5, quantity=3, stockDeducted=true → release()
+- **기대 결과:** `sample.getStock() == 5`
+- **커버 요구사항:** Phase7.md § 출고 처리 규칙 > 재고 충분 경로
+
+### [ReleaseServiceTest] 사이클 7: CONFIRMED 아닌 주문 출고 예외
+- **메서드명:** `CONFIRMED_아닌_주문_출고_예외`
+- **@DisplayName:** `"CONFIRMED 상태가 아닌 주문을 release하면 IllegalStateException이 발생한다"`
+- **입력:** RESERVED 상태 주문 → release()
+- **기대 결과:** `IllegalStateException`
+- **커버 요구사항:** Phase7.md § ReleaseService > release()
+
+### [ReleaseServiceTest] 사이클 8: 존재하지 않는 주문 출고 예외
+- **메서드명:** `존재하지않는_주문_출고_예외`
+- **@DisplayName:** `"존재하지 않는 주문 ID로 release 호출 시 IllegalArgumentException이 발생한다"`
+- **입력:** orderId="NONE"
+- **기대 결과:** `IllegalArgumentException`
+- **커버 요구사항:** Phase7.md § ReleaseService > release()
+
+### [ReleaseServiceTest] 사이클 9: 출고 후 CONFIRMED 목록에서 제거
+- **메서드명:** `출고_후_CONFIRMED_목록에서_제거`
+- **@DisplayName:** `"출고 처리 후 해당 주문이 findConfirmed() 목록에서 제외된다"`
+- **입력:** CONFIRMED 주문 1건 → release() → findConfirmed()
+- **기대 결과:** 빈 리스트
+- **커버 요구사항:** Phase7.md § ReleaseService > findConfirmed()
+
+### [통합 시나리오] 사이클 10: 전체 흐름 재고 충분
+- **메서드명:** `전체_흐름_재고충분`
+- **@DisplayName:** `"재고 충분 경로에서 출고 시 재고는 approve 시 1회만 차감된다"`
+- **입력:** stock=10, qty=5 → approve(CONFIRMED) → release()
+- **기대 결과:** `order.getStatus()==RELEASE`, `sample.getStock()==5` (1회만 차감)
+- **커버 요구사항:** Phase7.md § 경로별 재고 차감 시점
+
+### [통합 시나리오] 사이클 11: 전체 흐름 재고 부족
+- **메서드명:** `전체_흐름_재고부족`
+- **@DisplayName:** `"재고 부족 경로에서 출고 시 출고 시점에 재고가 차감된다"`
+- **입력:** stock=2, qty=5 → approve(PRODUCING) → processProduction → release()
+- **기대 결과:** `order.getStatus()==RELEASE`, 재고 차감 정상
+- **커버 요구사항:** Phase7.md § 경로별 재고 차감 시점
+
+### [통합 시나리오] 사이클 12: 복수 주문 순차 출고
+- **메서드명:** `복수_주문_순차_출고`
+- **@DisplayName:** `"여러 CONFIRMED 주문을 순차적으로 출고할 수 있다"`
+- **입력:** CONFIRMED 2건 → 각각 release()
+- **기대 결과:** 모두 RELEASE, findConfirmed() 빈 리스트
+- **커버 요구사항:** Phase7.md § 복수 주문 출고

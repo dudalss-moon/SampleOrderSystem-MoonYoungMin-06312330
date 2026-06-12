@@ -56,4 +56,12 @@ class OrderTest {
         assertThrows(IllegalArgumentException.class,
             () -> new Order("O001", sampleFixture(), "  ", 5));
     }
+
+    @Test
+    @DisplayName("Order 생성 시 stockDeducted 기본값은 false다")
+    void stockDeducted_기본값_false() {
+        Order order = new Order("O001", sampleFixture(), "홍길동", 5);
+
+        assertFalse(order.isStockDeducted());
+    }
 }
