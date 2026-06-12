@@ -136,4 +136,20 @@ class ProductionServiceTest {
             () -> assertTrue(sample.getStock() >= 5)
         );
     }
+
+    @Test
+    @DisplayName("2개 작업이 등록된 큐에서 FIFO 순서대로 처리된다")
+    void 복수_생산_큐_FIFO_처리() {
+        ProductionJob job1 = enqueueJob("S001", 0, 4);
+        ProductionJob job2 = enqueueJob("S002", 0, 4);
+
+        productionService.processProduction(job1.getTargetQty());
+        productionService.processProduction(job2.getTargetQty());
+
+        assertAll(
+            () -> assertEquals(OrderStatus.CONFIRMED, job1.getOrder().getStatus()),
+            () -> assertEquals(OrderStatus.CONFIRMED, job2.getOrder().getStatus()),
+            () -> assertTrue(productionService.getCurrentJob().isEmpty())
+        );
+    }
 }
