@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase9 테스트 커버리지 보강 완료)
+> 최종 업데이트: 2026-06-12 (Phase6 자동 생산 구현 완료)
 
 ## 전체 진행률
 
@@ -210,15 +210,16 @@ Phase9 ██████████ 완료
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase6.md](docs/design/Phase6.md) |
-| 테스트 | 9 / 9 통과 |
+| 테스트 | 16 / 16 통과 |
 
 **구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `service/ProductionService.java` | `processProduction()` / `completeJob()` 구현 |
+| `service/ProductionService.java` | `processAutoProduction()` / `completeJob()` / 스케줄러 생성자 / `shutdown()` 추가 |
+| `domain/ProductionJob.java` | `startTime` 필드 / `getStartTime()` / `setStartTime()` / `calcProducedByElapsed()` 추가 |
 | `domain/ProductionResult.java` | 생산 결과 DTO (completed, job) |
-| `ui/ProductionUI.java` | 현재 생산 현황 / 대기 목록 / 생산 진행 화면 |
+| `ui/ProductionUI.java` | 수동 생산 메뉴 항목 제거 (자동 생산으로 대체) |
 | `ui/ConsoleMenu.java` | 메뉴 4번 ProductionUI 라우팅 연결 |
 
 **TDD 테스트 케이스**
@@ -234,6 +235,13 @@ Phase9 ██████████ 완료
 | 7 | `ProductionServiceTest` | `생산량_초과_입력_처리` | ✅ PASS |
 | 8 | `ProductionServiceTest` | `재고부족_승인_후_생산_완료` | ✅ PASS |
 | 9 | `ProductionServiceTest` | `복수_생산_큐_FIFO_처리` | ✅ PASS |
+| 10 | `AutoProductionServiceTest` | `빈_큐일때_자동생산_무시` | ✅ PASS |
+| 11 | `AutoProductionServiceTest` | `startTime_자동설정` | ✅ PASS |
+| 12 | `AutoProductionServiceTest` | `경과시간_기반_생산량_갱신` | ✅ PASS |
+| 13 | `AutoProductionServiceTest` | `생산_자동완료_재고_주문상태_갱신` | ✅ PASS |
+| 14 | `AutoProductionServiceTest` | `다음_작업_startTime_자동설정` | ✅ PASS |
+| 15 | `AutoProductionServiceTest` | `스케줄러_통합_자동생산` | ✅ PASS |
+| 16 | `AutoProductionServiceTest` | `shutdown_후_스케줄러_종료` | ✅ PASS |
 
 ---
 
@@ -357,13 +365,13 @@ Phase9 ██████████ 완료
 | Phase1 | `Phase1Test` | 7 | 7 | 100% |
 | Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 17 | 17 | 100% |
 | Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 13 | 13 | 100% |
-| Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 12 | 12 | 100% |
+| Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 17 | 17 | 100% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 11 | 11 | 100% |
-| Phase6 | `ProductionServiceTest` | 9 | 9 | 100% |
+| Phase6 | `ProductionServiceTest`, `AutoProductionServiceTest` | 16 | 16 | 100% |
 | Phase7 | `OrderTest`, `ReleaseServiceTest` | 12 | 12 | 100% |
 | Phase8 | `DatabaseConfigTest`, `SchemaInitializerTest`, `JdbcSampleRepositoryTest`, `JdbcOrderRepositoryTest`, `JdbcProductionQueueRepositoryTest`, `DbPersistenceIntegrationTest` | 17 | 17 | 100% |
 | Phase9 | `ProductionResultTest`, `InMemoryOrderRepositoryTest`, `InMemoryProductionQueueRepositoryTest`, `InMemorySampleRepositoryTest`, `InputHandlerTest`, `ConsoleMenuTest`, `SampleUITest`, `OrderUITest`, `MonitorUITest`, `ProductionUITest`, `ReleaseUITest` | 50 | 50 | 100% |
-| **합계** | | **148** | **148** | **100%** |
+| **합계** | | **160** | **160** | **100%** |
 
 ---
 
