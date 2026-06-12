@@ -8,6 +8,7 @@ import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.ProductionQueueRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +42,21 @@ class ProductionQueueRepositoryTest {
     @DisplayName("빈 큐에서 peek 호출 시 Optional.empty()가 반환된다")
     void 빈_큐_peek_빈값() {
         assertTrue(repo.peek().isEmpty());
+    }
+
+    @Test
+    @DisplayName("getQueue는 현재 큐에 있는 작업 목록을 반환한다")
+    void 대기목록_조회() {
+        ProductionJob job1 = createJob("JOB-0001", 3, 10);
+        ProductionJob job2 = createJob("JOB-0002", 1, 5);
+        repo.enqueue(job1);
+        repo.enqueue(job2);
+        repo.dequeue();
+
+        List<ProductionJob> queue = repo.getQueue();
+
+        assertEquals(1, queue.size());
+        assertEquals(job2, queue.get(0));
     }
 
     @Test
