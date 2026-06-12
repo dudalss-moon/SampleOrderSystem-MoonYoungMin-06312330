@@ -217,7 +217,7 @@ Phase7 ██████████ 완료
 | `service/ProductionService.java` | `processProduction()` / `completeJob()` 구현 |
 | `domain/ProductionResult.java` | 생산 결과 DTO (completed, job) |
 | `ui/ProductionUI.java` | 현재 생산 현황 / 대기 목록 / 생산 진행 화면 |
-| `ui/ConsoleMenu.java` | 메뉴 5번 ProductionUI 라우팅 연결 |
+| `ui/ConsoleMenu.java` | 메뉴 4번 ProductionUI 라우팅 연결 |
 
 **TDD 테스트 케이스**
 
@@ -250,7 +250,7 @@ Phase7 ██████████ 완료
 | `service/OrderService.java` | `approve()` 재고 충분 분기에 `markStockDeducted()` 추가 |
 | `service/ReleaseService.java` | `findConfirmed()` / `release()` 구현 (차감 분기 포함) |
 | `ui/ReleaseUI.java` | 출고 대기 목록 / 출고 처리 화면 |
-| `ui/ConsoleMenu.java` | 메뉴 4번 ReleaseUI 라우팅 연결 |
+| `ui/ConsoleMenu.java` | 메뉴 5번 ReleaseUI 라우팅 연결 |
 
 **TDD 테스트 케이스**
 

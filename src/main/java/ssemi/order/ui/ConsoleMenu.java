@@ -58,8 +58,8 @@ public final class ConsoleMenu {
         System.out.println("  1. 시료 관리");
         System.out.println("  2. 주문 (접수/승인/거절)");
         System.out.println("  3. 모니터링");
-        System.out.println("  4. 출고 처리");
-        System.out.println("  5. 생산 라인");
+        System.out.println("  4. 생산 라인");
+        System.out.println("  5. 출고 처리");
         System.out.println("  0. 종료");
         System.out.println("----------------------------------------");
     }
@@ -73,8 +73,8 @@ public final class ConsoleMenu {
             case 1 -> sampleUI.show();
             case 2 -> orderUI.show();
             case 3 -> monitorUI.show();
-            case 4 -> releaseUI.show();
-            case 5 -> productionUI.show();
+            case 4 -> productionUI.show();
+            case 5 -> releaseUI.show();
             default -> System.out.println("올바른 메뉴를 선택해주세요.");
         }
     }
