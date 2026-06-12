@@ -39,6 +39,24 @@ class MonitorServiceTest {
     }
 
     @Test
+    @DisplayName("pendingQuantity는 RESERVED와 PRODUCING 상태 주문 수량의 합이다")
+    void 대기주문량_RESERVED_PRODUCING_합산() {
+        // RESERVED 수량=3, PRODUCING 수량=4, CONFIRMED 수량=5 → pending=7
+        Order o1 = reserveOrder("S001", "홍길동", 3);           // RESERVED
+        Order o2 = reserveOrder("S001", "김철수", 4);
+        o2.changeStatus(OrderStatus.PRODUCING);                   // PRODUCING
+        Order o3 = reserveOrder("S001", "이영희", 5);
+        o3.changeStatus(OrderStatus.CONFIRMED);                   // CONFIRMED (제외)
+
+        List<SampleStockInfo> infos = monitorService.getStockInfos();
+        SampleStockInfo info = infos.stream()
+            .filter(i -> i.getSample().getId().equals("S001"))
+            .findFirst().get();
+
+        assertEquals(7, info.getPendingQuantity());
+    }
+
+    @Test
     @DisplayName("getStockInfos는 등록된 모든 시료에 대한 SampleStockInfo를 반환한다")
     void 재고현황_전체_시료_포함() {
         sampleRepository.save(new Sample("S002", "베타칩", 20, 0.8, 5));
