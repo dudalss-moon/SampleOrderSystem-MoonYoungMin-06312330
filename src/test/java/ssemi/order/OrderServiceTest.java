@@ -111,6 +111,13 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 주문 ID로 approve 호출 시 IllegalArgumentException이 발생한다")
+    void 존재하지않는_주문_승인_예외() {
+        assertThrows(IllegalArgumentException.class,
+            () -> orderService.approve("NONE"));
+    }
+
+    @Test
     @DisplayName("findReserved는 RESERVED 상태 주문만 반환한다")
     void RESERVED_주문_목록_조회() {
         orderService.reserve("S001", "홍길동", 5);
