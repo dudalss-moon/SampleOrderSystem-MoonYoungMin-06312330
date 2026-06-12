@@ -37,6 +37,20 @@ class MonitorServiceTest {
     }
 
     @Test
+    @DisplayName("해당 상태의 주문이 없으면 빈 리스트가 반환된다")
+    void 주문없는_상태_빈리스트() {
+        reserveOrder("S001", "홍길동", 3); // RESERVED만 존재
+
+        Map<OrderStatus, List<Order>> result = monitorService.getOrdersByStatus();
+
+        assertAll(
+            () -> assertTrue(result.get(OrderStatus.PRODUCING).isEmpty()),
+            () -> assertTrue(result.get(OrderStatus.CONFIRMED).isEmpty()),
+            () -> assertTrue(result.get(OrderStatus.RELEASE).isEmpty())
+        );
+    }
+
+    @Test
     @DisplayName("getOrdersByStatus는 RESERVED/PRODUCING/CONFIRMED/RELEASE 4개 키를 반환하고 REJECTED는 제외한다")
     void 주문현황_상태별_그룹핑() {
         Order o1 = reserveOrder("S001", "홍길동", 3);
