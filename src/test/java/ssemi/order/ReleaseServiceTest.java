@@ -61,4 +61,14 @@ class ReleaseServiceTest {
 
         assertEquals(OrderStatus.RELEASE, order.getStatus());
     }
+
+    @Test
+    @DisplayName("stockDeducted=false인 CONFIRMED 주문 출고 시 sample.stock이 차감된다")
+    void 재고부족_경로_출고_재고차감() {
+        Order order = saveConfirmedOrder("S001", 5, 3); // stockDeducted 기본값 false
+
+        releaseService.release(order.getOrderId());
+
+        assertEquals(2, order.getSample().getStock());
+    }
 }
