@@ -94,4 +94,11 @@ class ProductionServiceTest {
 
         assertEquals(job2, productionService.getCurrentJob().get());
     }
+
+    @Test
+    @DisplayName("큐가 비어있을 때 processProduction 호출 시 IllegalStateException이 발생한다")
+    void 생산_큐_없을때_진행_예외() {
+        assertThrows(IllegalStateException.class,
+            () -> productionService.processProduction(5));
+    }
 }
