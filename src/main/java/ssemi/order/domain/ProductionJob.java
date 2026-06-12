@@ -25,5 +25,7 @@ public final class ProductionJob {
     public int getTargetQty() { return targetQty; }
     public int getProducedQty() { return producedQty; }
     public int getTotalTime() { return totalTime; }
-    public void setProducedQty(int producedQty) { this.producedQty = producedQty; }
+    public void produce(int qty) { this.producedQty += qty; }
+
+    public boolean isCompleted() { return producedQty >= targetQty; }
 }
