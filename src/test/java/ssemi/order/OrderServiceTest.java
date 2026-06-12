@@ -100,6 +100,17 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("RESERVED 상태가 아닌 주문을 approve 하면 IllegalStateException이 발생한다")
+    void RESERVED_아닌_주문_승인_예외() {
+        // stock=10, quantity=5 → CONFIRMED으로 먼저 전이
+        Order order = orderService.reserve("S001", "홍길동", 5);
+        orderService.approve(order.getOrderId()); // CONFIRMED 상태로 전이
+
+        assertThrows(IllegalStateException.class,
+            () -> orderService.approve(order.getOrderId()));
+    }
+
+    @Test
     @DisplayName("findReserved는 RESERVED 상태 주문만 반환한다")
     void RESERVED_주문_목록_조회() {
         orderService.reserve("S001", "홍길동", 5);
