@@ -63,4 +63,14 @@ class ProductionServiceTest {
 
         assertEquals(2 + job.getTargetQty(), sample.getStock());
     }
+
+    @Test
+    @DisplayName("생산 완료 시 주문 상태가 CONFIRMED로 변경된다")
+    void 생산_완료_주문상태_CONFIRMED() {
+        ProductionJob job = enqueueJob("S001", 0, 4);
+
+        productionService.processProduction(job.getTargetQty());
+
+        assertEquals(OrderStatus.CONFIRMED, job.getOrder().getStatus());
+    }
 }
