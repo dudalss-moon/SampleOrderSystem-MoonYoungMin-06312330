@@ -87,27 +87,34 @@ public class ProductionJob {
 public class ProductionService {
     - queueRepo: ProductionQueueRepository
     - orderRepo: OrderRepository
-    - scheduler: ScheduledExecutorService   // 자동 생산 스케줄러
+    - sampleRepo: SampleRepository              // 생산 완료 시 재고 DB 반영
+    - scheduler: ScheduledExecutorService       // 자동 생산 스케줄러
 
-    + createJob(order: Order): ProductionJob     // Phase4 구현 + 스케줄러 시작
+    // 스케줄러 없음 (테스트·수동 생산용)
+    + ProductionService(queueRepo, orderRepo, sampleRepo)
+    // 스케줄러 활성화 (운영용) — ConsoleMenu 5-arg 생성자에서 사용
+    + ProductionService(queueRepo, orderRepo, sampleRepo, periodMillis: long)
+
+    + createJob(order: Order): ProductionJob
     + getCurrentJob(): Optional<ProductionJob>
     + getQueueList(): List<ProductionJob>
     + processAutoProduction(): void              // 스케줄러가 주기적으로 호출
-    + completeJob(job: ProductionJob): void      // 완료 처리 (재고 추가·상태 전환·dequeue)
+    + completeJob(job: ProductionJob): void      // 완료 처리 (재고·주문 DB 반영 포함)
     + shutdown(): void                           // 스케줄러 종료 (애플리케이션 종료 시)
+    + isSchedulerShutdown(): boolean
 }
 ```
 
-**스케줄러 동작:**
+**스케줄러 동작 (ConsoleMenu → Main.java에서 1000ms 주기로 활성화):**
 
 ```java
-// createJob() 내부 또는 ProductionService 초기화 시 1회 시작
+// ConsoleMenu 5-arg 생성자에서 시작 (schedulerPeriodMillis > 0 인 경우)
 scheduler = Executors.newSingleThreadScheduledExecutor();
 scheduler.scheduleAtFixedRate(
     this::processAutoProduction,
     0,
-    1,           // 1초마다 실행 (1초 = 1분으로 압축)
-    TimeUnit.SECONDS
+    1000,        // 1000ms (1초)마다 실행 (1초 = 1분으로 압축)
+    TimeUnit.MILLISECONDS
 );
 ```
 
@@ -121,12 +128,11 @@ void processAutoProduction() {
     ProductionJob job = current.get();
     if (job.getStartTime() == null) {
         job.setStartTime(Instant.now());
+        return;
     }
 
     long elapsedSeconds = Duration.between(job.getStartTime(), Instant.now()).toSeconds();
-    int avgTime = job.getOrder().getSample().getAvgProductionTime(); // 분 단위
-    // 1초 = 1분으로 압축하여 시뮬레이션
-    int newProduced = Math.min(job.getTargetQty(), (int)(elapsedSeconds / avgTime));
+    int newProduced = job.calcProducedByElapsed(elapsedSeconds);
 
     if (newProduced > job.getProducedQty()) {
         job.produce(newProduced - job.getProducedQty());
@@ -134,9 +140,39 @@ void processAutoProduction() {
 
     if (job.isCompleted()) {
         completeJob(job);
+        queueRepo.peek().ifPresent(next -> next.setStartTime(Instant.now()));
     }
 }
 ```
+
+**completeJob() 로직 — DB 저장 포함:**
+
+```java
+void completeJob(ProductionJob job) {
+    Order order = job.getOrder();
+    order.getSample().addStock(job.getTargetQty());
+    sampleRepository.save(order.getSample());   // 재고 DB 반영
+    order.changeStatus(CONFIRMED);
+    orderRepository.save(order);               // 주문 상태 DB 반영
+    queueRepo.dequeue();
+}
+```
+
+> **주의:** `sampleRepository.save()` 와 `orderRepository.save()` 를 반드시 호출해야
+> JDBC 환경에서 모니터링이 PRODUCING → CONFIRMED 전환을 정확히 반영한다.
+
+### ConsoleMenu (스케줄러 연동)
+
+```java
+// 운영 환경 (Main.java): 1초 주기 스케줄러 활성화
+new ConsoleMenu(input, sampleRepo, orderRepo, queueRepo, 1000L)
+
+// 테스트 환경: 스케줄러 없음
+new ConsoleMenu(input, sampleRepo, orderRepo)              // 3-arg
+new ConsoleMenu(input, sampleRepo, orderRepo, queueRepo)   // 4-arg
+```
+
+- `run()` 종료 시 `productionService.shutdown()` 자동 호출 (try-finally)
 
 ### ProductionUI (변경)
 

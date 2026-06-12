@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase6 자동 생산 구현 완료)
+> 최종 업데이트: 2026-06-12 (Phase6 자동 생산 DB 반영 버그 수정)
 
 ## 전체 진행률
 
@@ -216,11 +216,11 @@ Phase9 ██████████ 완료
 
 | 파일 | 역할 |
 |------|------|
-| `service/ProductionService.java` | `processAutoProduction()` / `completeJob()` / 스케줄러 생성자 / `shutdown()` 추가 |
+| `service/ProductionService.java` | `processAutoProduction()` / `completeJob()` (DB 저장 포함) / 스케줄러 생성자 / `shutdown()` 추가 |
 | `domain/ProductionJob.java` | `startTime` 필드 / `getStartTime()` / `setStartTime()` / `calcProducedByElapsed()` 추가 |
 | `domain/ProductionResult.java` | 생산 결과 DTO (completed, job) |
 | `ui/ProductionUI.java` | 수동 생산 메뉴 항목 제거 (자동 생산으로 대체) |
-| `ui/ConsoleMenu.java` | 메뉴 4번 ProductionUI 라우팅 연결 |
+| `ui/ConsoleMenu.java` | 5-arg 생성자(스케줄러 활성화) 추가, `run()` 종료 시 `shutdown()` 연결 |
 
 **TDD 테스트 케이스**
 
@@ -242,6 +242,14 @@ Phase9 ██████████ 완료
 | 14 | `AutoProductionServiceTest` | `다음_작업_startTime_자동설정` | ✅ PASS |
 | 15 | `AutoProductionServiceTest` | `스케줄러_통합_자동생산` | ✅ PASS |
 | 16 | `AutoProductionServiceTest` | `shutdown_후_스케줄러_종료` | ✅ PASS |
+
+**버그 수정 (2026-06-12)**
+
+| 항목 | 내용 |
+|------|------|
+| 버그 1 | `completeJob()` 생산 완료 시 `orderRepository.save()` / `sampleRepository.save()` 누락 → JDBC 환경에서 모니터링에 CONFIRMED 미반영 |
+| 버그 2 | `ConsoleMenu`에서 `ProductionService` 스케줄러 미시작 → 자동 생산이 실제로 동작하지 않음 |
+| 수정 | `ProductionService`에 `SampleRepository` 의존성 추가, `completeJob()` DB 저장 추가, `ConsoleMenu` 5-arg 생성자 + `shutdown()` 연결, `Main.java` 1초 주기 스케줄러 활성화 |
 
 ---
 
