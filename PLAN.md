@@ -14,7 +14,7 @@
 | Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 완료 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
-| Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
+| Phase6 | 생산라인 (자동 생산 포함) | [Phase6.md](docs/design/Phase6.md) | 완료 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 완료 |
 | Phase8 | DB 연동 (H2 JDBC) | [Phase8.md](docs/design/Phase8.md) | 완료 |
 | Phase9 | 테스트 커버리지 보강 | [Phase9.md](docs/design/Phase9.md) | 완료 |
@@ -467,10 +467,11 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 
 ---
 
-## Phase6 TDD 계획
+## Phase6 TDD 계획 (수동 생산 — 초기 구현)
 
 > `getCurrentJob()` / `getQueueList()`는 Phase4에서 이미 구현됨.
 > Phase6은 `processProduction()` / `completeJob()` 구현 및 통합 시나리오에 집중.
+> **자동 생산 확장은 하단 "Phase6 자동 생산 TDD 계획" 섹션 참조.**
 
 ### [ProductionServiceTest] 사이클 1: 생산 진행 미완료
 - **메서드명:** `생산_진행_미완료`
@@ -651,7 +652,7 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - 주문 현황 빈/그룹·재고 레이블 여유/고갈 — PASS
 
 ### [사이클 8] ProductionUITest — 생산 라인 UI ✅
-- 현재 작업 없음/있음·대기 목록 빈·생산 진행 완료/중간 — PASS
+- 현재 작업 없음/있음·대기 목록 빈·메뉴_생산진행_항목_없음·메뉴_3선택_잘못된_선택_안내 — PASS
 
 ### [사이클 9] ReleaseUITest — 출고 처리 UI ✅
 - 출고 대기 없음·처리 성공·잘못된 주문번호·목록 출력 — PASS
