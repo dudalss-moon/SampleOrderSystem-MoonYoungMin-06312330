@@ -7,6 +7,7 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.ProductionQueueRepository;
+import ssemi.order.repository.inmemory.InMemoryProductionQueueRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ class ProductionQueueRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repo = new ProductionQueueRepository();
+        repo = new InMemoryProductionQueueRepository();
     }
 
     private ProductionJob createJob(String jobId, int stock, int quantity) {

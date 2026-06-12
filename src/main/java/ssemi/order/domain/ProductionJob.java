@@ -8,6 +8,18 @@ public final class ProductionJob {
     private int producedQty;
     private final int totalTime;
 
+    public static ProductionJob restore(String jobId, Order order, int targetQty, int producedQty, int totalTime) {
+        return new ProductionJob(jobId, order, targetQty, producedQty, totalTime);
+    }
+
+    private ProductionJob(String jobId, Order order, int targetQty, int producedQty, int totalTime) {
+        this.jobId = jobId;
+        this.order = order;
+        this.targetQty = targetQty;
+        this.producedQty = producedQty;
+        this.totalTime = totalTime;
+    }
+
     public ProductionJob(String jobId, Order order, int shortage) {
         this.jobId = jobId;
         this.order = order;
