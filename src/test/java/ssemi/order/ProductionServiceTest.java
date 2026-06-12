@@ -11,6 +11,7 @@ import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.service.OrderService;
 import ssemi.order.service.ProductionService;
 
@@ -120,7 +121,7 @@ class ProductionServiceTest {
     @Test
     @DisplayName("재고 부족으로 PRODUCING된 주문이 생산 완료 후 CONFIRMED로 전환되고 재고가 증가한다")
     void 재고부족_승인_후_생산_완료() {
-        SampleRepository sampleRepository = new SampleRepository();
+        SampleRepository sampleRepository = new InMemorySampleRepository();
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 2);
         sampleRepository.save(sample);
         OrderService orderService = new OrderService(orderRepository, sampleRepository, productionService);

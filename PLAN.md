@@ -619,3 +619,31 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** CONFIRMED 2건 → 각각 release()
 - **기대 결과:** 모두 RELEASE, findConfirmed() 빈 리스트
 - **커버 요구사항:** Phase7.md § 복수 주문 출고
+
+---
+
+## Phase8 TDD 계획 (현재 진행)
+
+### 현재 사이클: 4 / 18
+
+### [DatabaseConfigTest] 사이클 1: DB 연결 정상 ✅
+- **메서드명:** `데이터베이스_연결_정상` — PASS
+
+### [SchemaInitializerTest] 사이클 2: 스키마 초기화 테이블 생성 ✅
+- **메서드명:** `스키마_초기화_테이블_생성` — PASS
+
+### [SchemaInitializerTest] 사이클 3: 중복 초기화 오류 없음 ✅
+- **메서드명:** `스키마_중복_초기화_오류없음` — PASS
+
+### [JdbcSampleRepositoryTest] 사이클 4: 시료 저장 후 조회
+- **메서드명:** `시료_저장_후_ID로_조회`
+- **@DisplayName:** `"save 후 findById로 동일한 시료가 반환된다"`
+- **입력:** Sample(id="S001", name="알파센서", avgProductionTime=30, yield=0.9, stock=10) → save → findById("S001")
+- **기대 결과:** id, name, avgProductionTime, yield, stock 모두 일치
+- **커버 요구사항:** Phase8.md § 사이클 4
+
+**선행 리팩토링 (기존 테스트로 검증)**
+1. `SampleRepository` 인터페이스 추출
+2. 기존 `SampleRepository` → `inmemory/InMemorySampleRepository`로 이동·개명
+3. 기존 테스트·서비스의 참조 업데이트
+4. `jdbc/JdbcSampleRepository` 골격 생성
