@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase3 완료)
+> 최종 업데이트: 2026-06-12 (Phase4 완료)
 
 ## 전체 진행률
 
@@ -8,7 +8,7 @@
 Phase1 ██████████ 완료
 Phase2 ██████████ 완료
 Phase3 ██████████ 완료
-Phase4 ░░░░░░░░░░ 미시작
+Phase4 ██████████ 완료
 Phase5 ░░░░░░░░░░ 미시작
 Phase6 ░░░░░░░░░░ 미시작
 Phase7 ░░░░░░░░░░ 미시작
@@ -133,29 +133,39 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase4 — 주문 승인/거절 `미시작`
+### ✅ Phase4 — 주문 승인/거절 `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase4.md](docs/design/Phase4.md) |
-| 테스트 | 0 / 14 |
+| 테스트 | 12 / 12 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `domain/ProductionJob.java` | isCompleted / produce 메서드 추가 |
-| `repository/ProductionQueueRepository.java` | FIFO 큐, enqueue/dequeue/peek/generateJobId |
-| `service/ProductionService.java` | createJob |
-| `service/OrderService.java` | approve / reject 추가 |
+| `domain/ProductionJob.java` | `produce()` / `isCompleted()` 추가 |
+| `repository/ProductionQueueRepository.java` | FIFO 큐, enqueue/dequeue/peek/getQueue/generateJobId |
+| `service/ProductionService.java` | `createJob()` — 생산큐 등록 |
+| `service/OrderService.java` | `approve()` (재고 충분→CONFIRMED, 부족→PRODUCING) / `reject()` |
+| `ui/OrderUI.java` | 승인/거절 인터랙션 화면 |
 
-**예정 테스트 케이스 (14건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `ProductionJobTest` | 4 | targetQty, totalTime, isCompleted, produce |
-| `ProductionQueueRepositoryTest` | 4 | enqueue/peek/dequeue/FIFO |
-| `OrderServiceTest` (확장) | 6 | 재고충분/부족 승인, 거절, 예외 처리 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `ProductionJobTest` | `생산량_누적` | ✅ PASS |
+| 2 | `ProductionJobTest` | `생산_완료_여부_확인` | ✅ PASS |
+| 3 | `ProductionQueueRepositoryTest` | `작업_enqueue_후_peek_동일` | ✅ PASS |
+| 4 | `ProductionQueueRepositoryTest` | `FIFO_순서_보장` | ✅ PASS |
+| 5 | `ProductionQueueRepositoryTest` | `빈_큐_peek_빈값` | ✅ PASS |
+| 6 | `ProductionQueueRepositoryTest` | `대기목록_조회` | ✅ PASS |
+| 7 | `OrderServiceTest` | `재고_충분_승인_CONFIRMED` | ✅ PASS |
+| 8 | `OrderServiceTest` | `재고_부족_승인_PRODUCING` | ✅ PASS |
+| 9 | `OrderServiceTest` | `거절_REJECTED` | ✅ PASS |
+| 10 | `OrderServiceTest` | `RESERVED_아닌_주문_승인_예외` | ✅ PASS |
+| 11 | `OrderServiceTest` | `존재하지않는_주문_승인_예외` | ✅ PASS |
+| 12 | `OrderServiceTest` | `재고_부족시_생산량_계산_정확` | ✅ PASS |
 
 ---
 
@@ -239,11 +249,11 @@ Phase7 ░░░░░░░░░░ 미시작
 | Phase1 | `Phase1Test` | 7 | 7 | 100% |
 | Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 17 | 17 | 100% |
 | Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 13 | 13 | 100% |
-| Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 0 | 14 | 0% |
+| Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 12 | 12 | 100% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 0 | 11 | 0% |
 | Phase6 | `ProductionServiceTest` | 0 | 9 | 0% |
 | Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **37** | **81** | **46%** |
+| **합계** | | **49** | **81** | **60%** |
 
 ---
 

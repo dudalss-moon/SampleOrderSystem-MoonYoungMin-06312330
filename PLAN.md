@@ -13,7 +13,7 @@
 | Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 미시작 |
 | Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
-| Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 미시작 |
+| Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 진행중 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 미시작 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 미시작 |
 
@@ -381,3 +381,84 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** stock=2, quantity=10, yield=0.8 → shortage=8, targetQty=ceil(8/0.72)=ceil(11.11)=12
 - **기대 결과:** `job.getTargetQty() == 12`
 - **커버 요구사항:** Phase4.md § 승인 처리 규칙 > 실 생산량 계산
+
+---
+
+## Phase5 TDD 계획
+
+### [StockStatusTest] 사이클 1: 재고 0 고갈
+- **메서드명:** `재고0_고갈`
+- **@DisplayName:** `"stock이 0이면 StockStatus는 DEPLETED다"`
+- **입력:** stock=0, pendingQty=0
+- **기대 결과:** `DEPLETED`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+### [StockStatusTest] 사이클 2: 재고 부족
+- **메서드명:** `재고부족_부족`
+- **@DisplayName:** `"stock이 pendingQty보다 적으면 StockStatus는 SHORTAGE다"`
+- **입력:** stock=2, pendingQty=5
+- **기대 결과:** `SHORTAGE`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+### [StockStatusTest] 사이클 3: 재고 충분 여유
+- **메서드명:** `재고충분_여유`
+- **@DisplayName:** `"stock이 pendingQty보다 많으면 StockStatus는 PLENTY다"`
+- **입력:** stock=10, pendingQty=3
+- **기대 결과:** `PLENTY`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+### [StockStatusTest] 사이클 4: 재고 대기량 동일 여유
+- **메서드명:** `재고_대기량_동일_여유`
+- **@DisplayName:** `"stock이 pendingQty와 같으면 StockStatus는 PLENTY다"`
+- **입력:** stock=5, pendingQty=5
+- **기대 결과:** `PLENTY`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+### [MonitorServiceTest] 사이클 5: 주문 현황 상태별 그룹핑
+- **메서드명:** `주문현황_상태별_그룹핑`
+- **@DisplayName:** `"getOrdersByStatus는 RESERVED/PRODUCING/CONFIRMED/RELEASE 4개 키를 반환하고 REJECTED는 제외한다"`
+- **입력:** RESERVED 1건, CONFIRMED 1건, REJECTED 1건 등록
+- **기대 결과:** 키 4개(RESERVED/PRODUCING/CONFIRMED/RELEASE), REJECTED 키 없음
+- **커버 요구사항:** Phase5.md § 모니터링 대상 주문 상태
+
+### [MonitorServiceTest] 사이클 6: 주문 없는 상태 빈 리스트
+- **메서드명:** `주문없는_상태_빈리스트`
+- **@DisplayName:** `"해당 상태의 주문이 없으면 빈 리스트가 반환된다"`
+- **입력:** RESERVED 1건만 등록
+- **기대 결과:** PRODUCING/CONFIRMED/RELEASE → 빈 리스트
+- **커버 요구사항:** Phase5.md § MonitorService > getOrdersByStatus()
+
+### [MonitorServiceTest] 사이클 7: REJECTED 주문 제외 확인
+- **메서드명:** `REJECTED_주문_제외_확인`
+- **@DisplayName:** `"REJECTED 상태 주문은 주문 현황에 포함되지 않는다"`
+- **입력:** REJECTED 주문 등록 후 getOrdersByStatus()
+- **기대 결과:** 반환된 Map에 REJECTED 키 없음
+- **커버 요구사항:** Phase5.md § 모니터링 대상 주문 상태
+
+### [MonitorServiceTest] 사이클 8: 재고 현황 전체 시료 포함
+- **메서드명:** `재고현황_전체_시료_포함`
+- **@DisplayName:** `"getStockInfos는 등록된 모든 시료에 대한 SampleStockInfo를 반환한다"`
+- **입력:** 시료 2개 등록
+- **기대 결과:** 크기 2
+- **커버 요구사항:** Phase5.md § MonitorService > getStockInfos()
+
+### [MonitorServiceTest] 사이클 9: 대기주문량 RESERVED+PRODUCING 합산
+- **메서드명:** `대기주문량_RESERVED_PRODUCING_합산`
+- **@DisplayName:** `"pendingQuantity는 RESERVED와 PRODUCING 상태 주문 수량의 합이다"`
+- **입력:** RESERVED 수량=3, PRODUCING 수량=4, CONFIRMED 수량=5 등록
+- **기대 결과:** `pendingQuantity == 7`
+- **커버 요구사항:** Phase5.md § SampleStockInfo > pendingQuantity
+
+### [MonitorServiceTest] 사이클 10: 고갈 판단 정확성
+- **메서드명:** `고갈_판단_정확성`
+- **@DisplayName:** `"재고가 0이면 StockStatus가 DEPLETED다"`
+- **입력:** stock=0인 시료
+- **기대 결과:** `stockStatus == DEPLETED`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+### [MonitorServiceTest] 사이클 11: 부족 판단 정확성
+- **메서드명:** `부족_판단_정확성`
+- **@DisplayName:** `"재고가 대기주문량보다 적으면 StockStatus가 SHORTAGE다"`
+- **입력:** stock=2, RESERVED 수량=5인 시료
+- **기대 결과:** `stockStatus == SHORTAGE`
+- **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
