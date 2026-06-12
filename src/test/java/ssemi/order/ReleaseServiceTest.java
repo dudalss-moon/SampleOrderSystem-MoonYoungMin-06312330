@@ -135,4 +135,29 @@ class ReleaseServiceTest {
             () -> assertEquals(5, sample.getStock()) // approve 시 1회만 차감
         );
     }
+
+    @Test
+    @DisplayName("재고 부족 경로에서 출고 시 출고 시점에 재고가 차감된다")
+    void 전체_흐름_재고부족() {
+        // stock=2, qty=5 → approve(PRODUCING) → processProduction → release(출고 시 차감)
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 2);
+        sampleRepository.save(sample);
+        ProductionQueueRepository productionQueueRepo = new ProductionQueueRepository();
+        ProductionService productionService = new ProductionService(productionQueueRepo, orderRepository);
+        OrderService orderService = new OrderService(orderRepository, sampleRepository, productionService);
+
+        Order order = orderService.reserve("S001", "홍길동", 5);
+        orderService.approve(order.getOrderId()); // PRODUCING, stockDeducted=false
+
+        int targetQty = productionService.getCurrentJob().get().getTargetQty();
+        productionService.processProduction(targetQty); // CONFIRMED, stock += targetQty
+
+        int stockAfterProduction = sample.getStock(); // 2 + targetQty
+        releaseService.release(order.getOrderId());   // 출고 시 deductStock(5)
+
+        assertAll(
+            () -> assertEquals(OrderStatus.RELEASE, order.getStatus()),
+            () -> assertEquals(stockAfterProduction - 5, sample.getStock())
+        );
+    }
 }
