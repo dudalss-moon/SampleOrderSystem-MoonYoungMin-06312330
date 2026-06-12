@@ -624,7 +624,7 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 
 ## Phase8 TDD 계획 (현재 진행)
 
-### 현재 사이클: 4 / 18
+### 현재 사이클: 5 / 18
 
 ### [DatabaseConfigTest] 사이클 1: DB 연결 정상 ✅
 - **메서드명:** `데이터베이스_연결_정상` — PASS
@@ -647,3 +647,10 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 2. 기존 `SampleRepository` → `inmemory/InMemorySampleRepository`로 이동·개명
 3. 기존 테스트·서비스의 참조 업데이트
 4. `jdbc/JdbcSampleRepository` 골격 생성
+
+### [JdbcSampleRepositoryTest] 사이클 5: 재고 변경 DB 반영
+- **메서드명:** `재고_변경_DB_반영`
+- **@DisplayName:** `"addStock 후 save하면 DB의 stock 값이 갱신된다"`
+- **입력:** Sample(stock=5) save → addStock(3) → save → findById
+- **기대 결과:** `stock == 8`
+- **커버 요구사항:** Phase8.md § 사이클 5

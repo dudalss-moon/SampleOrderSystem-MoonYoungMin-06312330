@@ -9,6 +9,7 @@ import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.ProductionResult;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.repository.inmemory.InMemorySampleRepository;
@@ -26,7 +27,7 @@ class ProductionServiceTest {
     @BeforeEach
     void setUp() {
         productionQueueRepo = new ProductionQueueRepository();
-        orderRepository = new OrderRepository();
+        orderRepository = new InMemoryOrderRepository();
         productionService = new ProductionService(productionQueueRepo, orderRepository);
     }
 

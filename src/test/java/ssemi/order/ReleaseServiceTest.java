@@ -7,6 +7,7 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.repository.inmemory.InMemorySampleRepository;
@@ -26,7 +27,7 @@ class ReleaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository = new OrderRepository();
+        orderRepository = new InMemoryOrderRepository();
         sampleRepository = new InMemorySampleRepository();
         releaseService = new ReleaseService(orderRepository, sampleRepository);
     }

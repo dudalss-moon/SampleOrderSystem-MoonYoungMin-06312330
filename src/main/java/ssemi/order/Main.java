@@ -2,6 +2,7 @@ package ssemi.order;
 
 import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.ui.ConsoleMenu;
 import ssemi.order.ui.InputHandler;
@@ -10,7 +11,7 @@ public final class Main {
 
     public static void main(String[] args) {
         SampleRepository sampleRepository = new InMemorySampleRepository();
-        OrderRepository orderRepository = new OrderRepository();
+        OrderRepository orderRepository = new InMemoryOrderRepository();
         InputHandler inputHandler = new InputHandler();
         ConsoleMenu menu = new ConsoleMenu(inputHandler, sampleRepository, orderRepository);
         menu.run();

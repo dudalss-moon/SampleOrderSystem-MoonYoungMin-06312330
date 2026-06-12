@@ -7,6 +7,7 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.service.MonitorService;
@@ -28,7 +29,7 @@ class MonitorServiceTest {
     @BeforeEach
     void setUp() {
         sampleRepository = new InMemorySampleRepository();
-        orderRepository = new OrderRepository();
+        orderRepository = new InMemoryOrderRepository();
         monitorService = new MonitorService(orderRepository, sampleRepository);
         sampleRepository.save(new Sample("S001", "알파센서", 30, 0.9, 10));
     }
