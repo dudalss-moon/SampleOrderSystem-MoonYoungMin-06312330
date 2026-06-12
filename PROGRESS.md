@@ -6,7 +6,7 @@
 
 ```
 Phase1 ██████████ 완료
-Phase2 ░░░░░░░░░░ 미시작
+Phase2 ██████████ 완료
 Phase3 ░░░░░░░░░░ 미시작
 Phase4 ░░░░░░░░░░ 미시작
 Phase5 ░░░░░░░░░░ 미시작
@@ -53,29 +53,45 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase2 — 시료 관리 `미시작`
+### ✅ Phase2 — 시료 관리 `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase2.md](docs/design/Phase2.md) |
-| 테스트 | 0 / 17 |
+| 커밋 | `feat: Phase2 시료 관리 TDD 구현` |
+| 테스트 | 17 / 17 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `domain/Sample.java` | 유효성 검증 + addStock / deductStock / hasEnoughStock |
-| `repository/SampleRepository.java` | Map 기반 재구현, findById / findByName / existsById 추가 |
-| `service/SampleService.java` | 시료 등록 / 조회 / 검색 |
-| `ui/SampleUI.java` | 시료 관리 화면 |
+| `domain/Sample.java` | 유효성 검증 추가 + addStock / deductStock / hasEnoughStock |
+| `repository/SampleRepository.java` | Map 기반 재구현, findById / findByName / existsById / existsByName |
+| `service/SampleService.java` | 시료 등록 (중복 검증) / 조회 / 검색 |
+| `ui/SampleUI.java` | 시료 등록 / 목록 / 검색 화면 |
+| `ui/ConsoleMenu.java` | 메뉴 1번 SampleUI 라우팅 연결 |
 
-**예정 테스트 케이스 (17건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `SampleTest` | 8 | 유효성, addStock, deductStock, hasEnoughStock |
-| `SampleRepositoryTest` | 5 | save/findById/findByName/existsById |
-| `SampleServiceTest` | 4 | 등록, 중복 ID/이름 예외, 검색 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `SampleTest` | `시료_생성_정상` | ✅ PASS |
+| 2 | `SampleTest` | `수율_0이하_예외` | ✅ PASS |
+| 3 | `SampleTest` | `수율_1초과_예외` | ✅ PASS |
+| 4 | `SampleTest` | `평균생산시간_0이하_예외` | ✅ PASS |
+| 5 | `SampleTest` | `재고_추가_정상` | ✅ PASS |
+| 6 | `SampleTest` | `재고_차감_정상` | ✅ PASS |
+| 7 | `SampleTest` | `재고_차감_부족_예외` | ✅ PASS |
+| 8 | `SampleTest` | `재고_충분_여부_확인` | ✅ PASS |
+| 9 | `SampleRepositoryTest` | `시료_저장_후_ID로_조회` | ✅ PASS |
+| 10 | `SampleRepositoryTest` | `전체_시료_조회` | ✅ PASS |
+| 11 | `SampleRepositoryTest` | `이름으로_검색_부분일치` | ✅ PASS |
+| 12 | `SampleRepositoryTest` | `존재하지않는_ID_조회_빈값` | ✅ PASS |
+| 13 | `SampleRepositoryTest` | `중복_ID_존재여부_확인` | ✅ PASS |
+| 14 | `SampleServiceTest` | `시료_등록_정상` | ✅ PASS |
+| 15 | `SampleServiceTest` | `중복_ID_등록_예외` | ✅ PASS |
+| 16 | `SampleServiceTest` | `중복_이름_등록_예외` | ✅ PASS |
+| 17 | `SampleServiceTest` | `검색_결과_없음_빈리스트` | ✅ PASS |
 
 ---
 
@@ -209,13 +225,13 @@ Phase7 ░░░░░░░░░░ 미시작
 | Phase | 테스트 파일 | 통과 | 전체 | 진행률 |
 |-------|------------|------|------|--------|
 | Phase1 | `Phase1Test` | 7 | 7 | 100% |
-| Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 0 | 17 | 0% |
+| Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 17 | 17 | 100% |
 | Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 0 | 13 | 0% |
 | Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 0 | 14 | 0% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 0 | 11 | 0% |
 | Phase6 | `ProductionServiceTest` | 0 | 9 | 0% |
 | Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **7** | **81** | **9%** |
+| **합계** | | **24** | **81** | **30%** |
 
 ---
 
