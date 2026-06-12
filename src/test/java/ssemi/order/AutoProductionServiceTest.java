@@ -3,6 +3,7 @@ package ssemi.order;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.ProductionJob;
@@ -12,6 +13,7 @@ import ssemi.order.repository.inmemory.InMemoryProductionQueueRepository;
 import ssemi.order.service.ProductionService;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,6 +77,34 @@ class AutoProductionServiceTest {
             () -> assertEquals(OrderStatus.CONFIRMED, job.getOrder().getStatus()),
             () -> assertTrue(job.getOrder().getSample().getStock() > 0)
         );
+    }
+
+    @Test
+    @DisplayName("shutdown 호출 후 스케줄러가 종료된다")
+    void shutdown_후_스케줄러_종료() {
+        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, 100L);
+        scheduledService.shutdown();
+        assertTrue(scheduledService.isSchedulerShutdown());
+    }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    @DisplayName("createJob 후 실제 시간 경과 시 자동으로 생산이 완료된다")
+    void createJob_후_스케줄러_자동생산_완료() throws InterruptedException {
+        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, 50L);
+        try {
+            Sample sample = new Sample("S001", "알파센서", 1, 0.9, 0);
+            String orderId = orderRepo.generateId();
+            Order order = new Order(orderId, sample, "홍길동", 3);
+            orderRepo.save(order);
+            order.changeStatus(OrderStatus.PRODUCING);
+            scheduledService.createJob(order);
+
+            Thread.sleep(5000);
+            assertEquals(OrderStatus.CONFIRMED, order.getStatus());
+        } finally {
+            scheduledService.shutdown();
+        }
     }
 
     @Test
