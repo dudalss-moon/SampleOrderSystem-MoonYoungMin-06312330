@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase4 완료)
+> 최종 업데이트: 2026-06-12 (Phase5 완료)
 
 ## 전체 진행률
 
@@ -9,7 +9,7 @@ Phase1 ██████████ 완료
 Phase2 ██████████ 완료
 Phase3 ██████████ 완료
 Phase4 ██████████ 완료
-Phase5 ░░░░░░░░░░ 미시작
+Phase5 ██████████ 완료
 Phase6 ░░░░░░░░░░ 미시작
 Phase7 ░░░░░░░░░░ 미시작
 ```
@@ -169,28 +169,37 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase5 — 모니터링 `미시작`
+### ✅ Phase5 — 모니터링 `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase5.md](docs/design/Phase5.md) |
-| 테스트 | 0 / 11 |
+| 테스트 | 11 / 11 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `domain/StockStatus.java` | 재고 상태 Enum (PLENTY/SHORTAGE/DEPLETED) |
-| `domain/SampleStockInfo.java` | 재고 현황 DTO |
-| `service/MonitorService.java` | 주문/재고 현황 조회 |
-| `ui/MonitorUI.java` | 모니터링 화면 |
+| `domain/StockStatus.java` | PLENTY/SHORTAGE/DEPLETED + `of(stock, pendingQty)` 팩토리 |
+| `domain/SampleStockInfo.java` | 재고 현황 DTO (sample, pendingQuantity, stockStatus) |
+| `service/MonitorService.java` | `getOrdersByStatus()` / `getStockInfos()` / `calcPendingQty()` |
+| `ui/MonitorUI.java` | 주문 현황 / 재고 현황 화면 |
 
-**예정 테스트 케이스 (11건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `StockStatusTest` | 4 | DEPLETED/SHORTAGE/PLENTY 판단 |
-| `MonitorServiceTest` | 7 | 상태별 그룹핑, REJECTED 제외, 재고 현황 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `StockStatusTest` | `재고0_고갈` | ✅ PASS |
+| 2 | `StockStatusTest` | `재고부족_부족` | ✅ PASS |
+| 3 | `StockStatusTest` | `재고충분_여유` | ✅ PASS |
+| 4 | `StockStatusTest` | `재고_대기량_동일_여유` | ✅ PASS |
+| 5 | `MonitorServiceTest` | `주문현황_상태별_그룹핑` | ✅ PASS |
+| 6 | `MonitorServiceTest` | `주문없는_상태_빈리스트` | ✅ PASS |
+| 7 | `MonitorServiceTest` | `REJECTED_주문_제외_확인` | ✅ PASS |
+| 8 | `MonitorServiceTest` | `재고현황_전체_시료_포함` | ✅ PASS |
+| 9 | `MonitorServiceTest` | `대기주문량_RESERVED_PRODUCING_합산` | ✅ PASS |
+| 10 | `MonitorServiceTest` | `고갈_판단_정확성` | ✅ PASS |
+| 11 | `MonitorServiceTest` | `부족_판단_정확성` | ✅ PASS |
 
 ---
 
@@ -250,10 +259,10 @@ Phase7 ░░░░░░░░░░ 미시작
 | Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 17 | 17 | 100% |
 | Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 13 | 13 | 100% |
 | Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 12 | 12 | 100% |
-| Phase5 | `StockStatusTest`, `MonitorServiceTest` | 0 | 11 | 0% |
+| Phase5 | `StockStatusTest`, `MonitorServiceTest` | 11 | 11 | 100% |
 | Phase6 | `ProductionServiceTest` | 0 | 9 | 0% |
 | Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **49** | **81** | **60%** |
+| **합계** | | **60** | **81** | **74%** |
 
 ---
 
