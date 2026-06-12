@@ -7,8 +7,10 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.service.OrderService;
+import ssemi.order.service.ProductionService;
 
 import java.util.List;
 
@@ -18,11 +20,16 @@ class OrderServiceTest {
 
     private OrderService orderService;
     private SampleRepository sampleRepository;
+    private ProductionQueueRepository productionQueueRepo;
 
     @BeforeEach
     void setUp() {
         sampleRepository = new SampleRepository();
-        orderService = new OrderService(new OrderRepository(), sampleRepository);
+        productionQueueRepo = new ProductionQueueRepository();
+        orderService = new OrderService(
+            new OrderRepository(), sampleRepository,
+            new ProductionService(productionQueueRepo)
+        );
         sampleRepository.save(new Sample("S001", "알파센서", 30, 0.9, 10));
     }
 
@@ -51,6 +58,20 @@ class OrderServiceTest {
     void 수량_0이하_예약_예외() {
         assertThrows(IllegalArgumentException.class,
             () -> orderService.reserve("S001", "홍길동", 0));
+    }
+
+    @Test
+    @DisplayName("재고가 충분할 때 approve 호출 시 주문 상태가 CONFIRMED로 변경되고 재고가 차감된다")
+    void 재고_충분_승인_CONFIRMED() {
+        // stock=10, quantity=5 → 재고 충분
+        Order order = orderService.reserve("S001", "홍길동", 5);
+
+        Order approved = orderService.approve(order.getOrderId());
+
+        assertAll(
+            () -> assertEquals(OrderStatus.CONFIRMED, approved.getStatus()),
+            () -> assertEquals(5, sampleRepository.findById("S001").get().getStock())
+        );
     }
 
     @Test

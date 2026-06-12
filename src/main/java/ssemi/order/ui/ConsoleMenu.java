@@ -1,8 +1,10 @@
 package ssemi.order.ui;
 
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.service.OrderService;
+import ssemi.order.service.ProductionService;
 import ssemi.order.service.SampleService;
 
 public final class ConsoleMenu {
@@ -16,7 +18,8 @@ public final class ConsoleMenu {
         this.input = input;
         this.sampleRepository = sampleRepository;
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
-        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository), input);
+        ProductionService productionService = new ProductionService(new ProductionQueueRepository());
+        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), input);
     }
 
     public void run() {
