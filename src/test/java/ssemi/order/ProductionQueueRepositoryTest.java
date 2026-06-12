@@ -38,6 +38,12 @@ class ProductionQueueRepositoryTest {
     }
 
     @Test
+    @DisplayName("빈 큐에서 peek 호출 시 Optional.empty()가 반환된다")
+    void 빈_큐_peek_빈값() {
+        assertTrue(repo.peek().isEmpty());
+    }
+
+    @Test
     @DisplayName("enqueue 순서대로 dequeue된다")
     void FIFO_순서_보장() {
         ProductionJob job1 = createJob("JOB-0001", 3, 10);
