@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase6 자동 생산 DB 반영 버그 수정)
+> 최종 업데이트: 2026-06-12 (Phase6 자동 생산 DB 반영 버그 수정 — start_time 컬럼 추가 및 enqueue 저장)
 
 ## 전체 진행률
 
@@ -249,7 +249,9 @@ Phase9 ██████████ 완료
 |------|------|
 | 버그 1 | `completeJob()` 생산 완료 시 `orderRepository.save()` / `sampleRepository.save()` 누락 → JDBC 환경에서 모니터링에 CONFIRMED 미반영 |
 | 버그 2 | `ConsoleMenu`에서 `ProductionService` 스케줄러 미시작 → 자동 생산이 실제로 동작하지 않음 |
-| 수정 | `ProductionService`에 `SampleRepository` 의존성 추가, `completeJob()` DB 저장 추가, `ConsoleMenu` 5-arg 생성자 + `shutdown()` 연결, `Main.java` 1초 주기 스케줄러 활성화 |
+| 버그 3 | `JdbcProductionQueueRepository.peek()`이 매 틱마다 DB에서 새 객체를 재구성하므로, `job.setStartTime()` 인메모리 변경이 다음 틱에 소실됨 → `processAutoProduction()`에서 상태 변경 후 `enqueue(job)` 호출 누락, `production_jobs` 테이블에 `start_time` 컬럼 미존재 |
+| 수정 1~2 | `ProductionService`에 `SampleRepository` 의존성 추가, `completeJob()` DB 저장 추가, `ConsoleMenu` 5-arg 생성자 + `shutdown()` 연결, `Main.java` 1초 주기 스케줄러 활성화 |
+| 수정 3 | `SchemaInitializer`에 `start_time TIMESTAMP` 컬럼 추가, `JdbcProductionQueueRepository.enqueue()` MERGE에 `start_time` 포함, `loadAll()`에서 `start_time` 복원, `processAutoProduction()`에서 `setStartTime()` / `produce()` 후 `enqueue(job)` 호출, `InMemoryProductionQueueRepository.enqueue()` 중복 방지 멱등화 |
 
 ---
 
