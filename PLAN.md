@@ -9,13 +9,14 @@
 
 | Phase | 기능 | 설계 문서 | 상태 |
 |-------|------|-----------|------|
-| Phase1 | 기반 구조 + 메인 메뉴 | [Phase1.md](docs/design/Phase1.md) | 미시작 |
-| Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 미시작 |
-| Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
+| Phase1 | 기반 구조 + 메인 메뉴 | [Phase1.md](docs/design/Phase1.md) | 완료 |
+| Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 완료 |
+| Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 완료 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 완료 |
+| Phase8 | DB 연동 (H2 JDBC) | [Phase8.md](docs/design/Phase8.md) | 미시작 |
 
 ## 아키텍처 원칙
 - 계층 구조: `ui` → `service` → `domain` → `repository`

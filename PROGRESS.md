@@ -12,6 +12,7 @@ Phase4 ██████████ 완료
 Phase5 ██████████ 완료
 Phase6 ██████████ 완료
 Phase7 ██████████ 완료
+Phase8 ░░░░░░░░░░ 미시작
 ```
 
 ---
@@ -268,6 +269,17 @@ Phase7 ██████████ 완료
 | 10 | `ReleaseServiceTest` | `전체_흐름_재고충분` | ✅ PASS |
 | 11 | `ReleaseServiceTest` | `전체_흐름_재고부족` | ✅ PASS |
 | 12 | `ReleaseServiceTest` | `복수_주문_순차_출고` | ✅ PASS |
+
+---
+
+---
+
+### ⬜ Phase8 — DB 연동 (H2 JDBC) `미시작`
+
+| 항목 | 내용 |
+|------|------|
+| 설계 문서 | [Phase8.md](docs/design/Phase8.md) |
+| 목표 | 인메모리 Repository → H2 JDBC 기반 영속 저장소로 교체 |
 
 ---
 
