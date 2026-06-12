@@ -36,4 +36,17 @@ class ProductionQueueRepositoryTest {
 
         assertEquals(job, repo.peek().get());
     }
+
+    @Test
+    @DisplayName("enqueue 순서대로 dequeue된다")
+    void FIFO_순서_보장() {
+        ProductionJob job1 = createJob("JOB-0001", 3, 10);
+        ProductionJob job2 = createJob("JOB-0002", 1, 5);
+
+        repo.enqueue(job1);
+        repo.enqueue(job2);
+
+        assertEquals(job1, repo.dequeue().get());
+        assertEquals(job2, repo.dequeue().get());
+    }
 }
