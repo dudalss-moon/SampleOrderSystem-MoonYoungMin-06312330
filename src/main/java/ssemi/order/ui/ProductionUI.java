@@ -1,7 +1,6 @@
 package ssemi.order.ui;
 
 import ssemi.order.domain.ProductionJob;
-import ssemi.order.domain.ProductionResult;
 import ssemi.order.service.ProductionService;
 
 import java.util.List;
@@ -24,7 +23,6 @@ public final class ProductionUI {
             switch (choice) {
                 case 1 -> displayCurrentJob();
                 case 2 -> displayQueue();
-                case 3 -> processProduction();
                 case 0 -> { return; }
                 default -> System.out.println("올바른 메뉴를 선택해주세요.");
             }
@@ -37,7 +35,6 @@ public final class ProductionUI {
         System.out.println("========================================");
         System.out.println("  1. 현재 생산 현황");
         System.out.println("  2. 생산 대기 목록");
-        System.out.println("  3. 생산 진행");
         System.out.println("  0. 메인 메뉴로");
         System.out.println("----------------------------------------");
     }
@@ -88,31 +85,4 @@ public final class ProductionUI {
         System.out.printf("총 %d건 대기 중%n", queue.size());
     }
 
-    void processProduction() {
-        Optional<ProductionJob> current = productionService.getCurrentJob();
-        if (current.isEmpty()) {
-            System.out.println("[현재 생산 중인 작업이 없습니다.]");
-            return;
-        }
-        ProductionJob job = current.get();
-        System.out.println("[생산 진행]");
-        System.out.printf("현재 작업: %s (%s %d개 생산)%n",
-            job.getJobId(), job.getOrder().getSample().getName(), job.getTargetQty());
-
-        int qty = input.readInt("생산 수량 입력 > ");
-        ProductionResult result = productionService.processProduction(qty);
-        ProductionJob finished = result.getJob();
-
-        if (result.isCompleted()) {
-            System.out.printf("→ 생산 완료! %s %d개가 재고에 추가되었습니다.%n",
-                finished.getOrder().getSample().getName(), finished.getTargetQty());
-            System.out.printf("→ 주문 %s 상태가 CONFIRMED로 변경되었습니다.%n",
-                finished.getOrder().getOrderId());
-            productionService.getCurrentJob().ifPresent(next ->
-                System.out.printf("→ 다음 작업 %s 생산을 시작합니다.%n", next.getJobId()));
-        } else {
-            System.out.printf("→ 생산 진행 중: %d / %d개 완료%n",
-                finished.getProducedQty(), finished.getTargetQty());
-        }
-    }
 }

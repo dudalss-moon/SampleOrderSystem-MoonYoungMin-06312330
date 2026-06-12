@@ -767,3 +767,70 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** 파일 DB에 시료/주문 저장 → DB 닫기 → 재연결 → findAll
 - **기대 결과:** 재연결 후에도 동일한 데이터 반환
 - **커버 요구사항:** Phase8.md § 사이클 18
+
+---
+
+## Phase6 자동 생산 TDD 계획 (추가 구현)
+
+> `ScheduledExecutorService` 기반 백그라운드 자동 생산.  
+> `avgProductionTime(분)` = 실제 `N초`로 압축 시뮬레이션 (1분 → 1초).
+
+### 사이클 1 — ProductionJob: startTime 필드
+
+**파일:** `ProductionJobTest.java` (기존에 추가)
+
+| # | 메서드명 | DisplayName | 기대 결과 |
+|---|---------|-------------|----------|
+| 1 | `startTime_기본값_null` | "새로 생성된 ProductionJob의 startTime은 null이다" | `getStartTime() == null` |
+| 2 | `startTime_설정_후_조회` | "setStartTime 호출 후 getStartTime이 동일 Instant를 반환한다" | `getStartTime() == 주입값` |
+
+**구현 대상:** `ProductionJob` — `Instant startTime` 필드, `setStartTime()`, `getStartTime()` 추가
+
+### 사이클 2 — ProductionJob: calcProducedByElapsed()
+
+**파일:** `ProductionJobTest.java` (기존에 추가)
+
+| # | 메서드명 | DisplayName | 기대 결과 |
+|---|---------|-------------|----------|
+| 3 | `경과시간_기반_생산량_계산` | "avgTime=30, 경과60초 → 생산량 2개" | `calcProducedByElapsed(60) == 2` |
+| 4 | `경과시간_부족_생산량_0` | "avgTime=30, 경과10초 → 생산량 0개" | `calcProducedByElapsed(10) == 0` |
+| 5 | `경과시간_초과_시_targetQty로_보정` | "충분한 경과 시간이어도 targetQty를 초과하지 않는다" | `calcProducedByElapsed(9999) == targetQty` |
+
+**구현 대상:** `ProductionJob.calcProducedByElapsed(long elapsedSeconds)` 추가
+- 공식: `min(targetQty, (int)(elapsedSeconds / avgProductionTime))`
+
+### 사이클 3 — ProductionService: processAutoProduction()
+
+**파일:** `AutoProductionServiceTest.java` (신규)
+
+| # | 메서드명 | DisplayName | 기대 결과 |
+|---|---------|-------------|----------|
+| 6 | `빈_큐_processAutoProduction_무시` | "큐가 비어있을 때 processAutoProduction 호출 시 예외 없이 종료된다" | 예외 없음 |
+| 7 | `startTime_없을때_자동설정` | "startTime이 null이면 processAutoProduction 호출 시 현재 시각으로 자동 설정된다" | `getStartTime() != null` |
+| 8 | `경과시간_기반_생산량_자동_갱신` | "과거 startTime 설정 시 processAutoProduction 호출로 생산량이 증가한다" | `producedQty > 0` |
+| 9 | `자동생산_완료_재고증가_CONFIRMED` | "자동 생산 완료 시 재고가 추가되고 주문이 CONFIRMED로 변경된다" | `stock 증가, status == CONFIRMED` |
+| 10 | `자동생산_완료_후_다음작업_startTime_자동설정` | "첫 번째 작업 완료 후 다음 작업의 startTime이 자동 설정된다" | `job2.getStartTime() != null` |
+
+**구현 대상:** `ProductionService.processAutoProduction()` public 메서드
+
+### 사이클 4 — ProductionService: 스케줄러 + shutdown()
+
+**파일:** `AutoProductionServiceTest.java` (추가)
+
+| # | 메서드명 | DisplayName | 기대 결과 |
+|---|---------|-------------|----------|
+| 11 | `createJob_후_스케줄러_자동생산_완료` | "createJob 후 실제 시간 경과 시 자동으로 생산이 완료된다" | `status == CONFIRMED` |
+| 12 | `shutdown_후_스케줄러_종료` | "shutdown 호출 후 스케줄러가 종료된다" | `isShutdown == true` |
+
+**구현 대상:** 스케줄러 내장 + `shutdown()` + 테스트용 생성자 `ProductionService(queueRepo, orderRepo, long periodMillis)`
+
+### 사이클 5 — ProductionUI: 수동 메뉴 제거
+
+**파일:** `ProductionUITest.java` (수정)
+
+| # | 메서드명 | DisplayName | 기대 결과 |
+|---|---------|-------------|----------|
+| 13 | `메뉴_생산진행_항목_없음` | "생산 라인 메뉴에 '생산 진행' 항목이 표시되지 않는다" | `"3. 생산 진행"` 미포함 |
+| 14 | `메뉴_3선택_잘못된_선택_안내` | "메뉴 3 선택 시 올바른 메뉴 안내 후 종료된다" | `"올바른 메뉴"` 포함 |
+
+**구현 대상:** `ProductionUI` — case 3 제거, 메뉴 항목 제거

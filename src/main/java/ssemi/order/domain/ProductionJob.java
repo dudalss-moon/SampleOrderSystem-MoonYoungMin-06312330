@@ -1,5 +1,7 @@
 package ssemi.order.domain;
 
+import java.time.Instant;
+
 public final class ProductionJob {
 
     private final String jobId;
@@ -7,6 +9,7 @@ public final class ProductionJob {
     private final int targetQty;
     private int producedQty;
     private final int totalTime;
+    private Instant startTime;
 
     public static ProductionJob restore(String jobId, Order order, int targetQty, int producedQty, int totalTime) {
         return new ProductionJob(jobId, order, targetQty, producedQty, totalTime);
@@ -37,7 +40,14 @@ public final class ProductionJob {
     public int getTargetQty() { return targetQty; }
     public int getProducedQty() { return producedQty; }
     public int getTotalTime() { return totalTime; }
+    public Instant getStartTime() { return startTime; }
+    public void setStartTime(Instant startTime) { this.startTime = startTime; }
     public void produce(int qty) { this.producedQty += qty; }
+
+    public int calcProducedByElapsed(long elapsedSeconds) {
+        int avgTime = order.getSample().getAvgProductionTime();
+        return Math.min(targetQty, (int) (elapsedSeconds / avgTime));
+    }
 
     public boolean isCompleted() { return producedQty >= targetQty; }
 }

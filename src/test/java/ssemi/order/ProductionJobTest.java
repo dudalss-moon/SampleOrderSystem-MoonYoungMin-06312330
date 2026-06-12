@@ -6,6 +6,8 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.Sample;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductionJobTest {
@@ -53,5 +55,52 @@ class ProductionJobTest {
 
         job.produce(1); // 누적 10
         assertTrue(job.isCompleted());
+    }
+
+    @Test
+    @DisplayName("새로 생성된 ProductionJob의 startTime은 null이다")
+    void startTime_기본값_null() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
+        Order order = new Order("ORD-0001", sample, "홍길동", 5);
+        ProductionJob job = new ProductionJob("JOB-0001", order, 5);
+        assertNull(job.getStartTime());
+    }
+
+    @Test
+    @DisplayName("setStartTime 호출 후 getStartTime이 동일 Instant를 반환한다")
+    void startTime_설정_후_조회() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
+        Order order = new Order("ORD-0001", sample, "홍길동", 5);
+        ProductionJob job = new ProductionJob("JOB-0001", order, 5);
+        Instant now = Instant.now();
+        job.setStartTime(now);
+        assertEquals(now, job.getStartTime());
+    }
+
+    @Test
+    @DisplayName("avgTime=30, 경과60초 → 생산량 2개")
+    void 경과시간_기반_생산량_계산() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
+        Order order = new Order("ORD-0001", sample, "홍길동", 10);
+        ProductionJob job = new ProductionJob("JOB-0001", order, 10);
+        assertEquals(2, job.calcProducedByElapsed(60));
+    }
+
+    @Test
+    @DisplayName("avgTime=30, 경과10초 → 생산량 0개")
+    void 경과시간_부족_생산량_0() {
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
+        Order order = new Order("ORD-0001", sample, "홍길동", 10);
+        ProductionJob job = new ProductionJob("JOB-0001", order, 10);
+        assertEquals(0, job.calcProducedByElapsed(10));
+    }
+
+    @Test
+    @DisplayName("충분한 경과 시간이어도 targetQty를 초과하지 않는다")
+    void 경과시간_초과_시_targetQty로_보정() {
+        Sample sample = new Sample("S001", "알파센서", 1, 0.9, 0);
+        Order order = new Order("ORD-0001", sample, "홍길동", 4);
+        ProductionJob job = new ProductionJob("JOB-0001", order, 4);
+        assertEquals(job.getTargetQty(), job.calcProducedByElapsed(9999));
     }
 }

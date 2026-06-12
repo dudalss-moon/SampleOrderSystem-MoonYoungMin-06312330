@@ -105,44 +105,22 @@ class ProductionUITest {
     }
 
     @Test
-    @DisplayName("targetQty만큼 생산 입력 시 '생산 완료' 메시지와 'CONFIRMED' 상태가 출력된다")
-    void 생산_진행_완료() {
-        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
-        sampleRepo.save(sample);
-        Order order = producingOrder(sample, 5);
-        ProductionJob job = new ProductionJob("JOB-0001", order, 5);
-        int targetQty = job.getTargetQty();
-        queueRepo.enqueue(job);
-
+    @DisplayName("생산 라인 메뉴에 '생산 진행' 항목이 표시되지 않는다")
+    void 메뉴_생산진행_항목_없음() {
         ProductionService ps = new ProductionService(queueRepo, orderRepo);
-        InputHandler input = inputOf("3", String.valueOf(targetQty), "0");
+        InputHandler input = inputOf("0");
         ProductionUI ui = new ProductionUI(ps, input);
-
         ui.show();
-
-        String output = out.toString();
-        assertTrue(output.contains("생산 완료"), "출력: " + output);
-        assertTrue(output.contains("CONFIRMED"), "출력: " + output);
+        assertFalse(out.toString().contains("3. 생산 진행"));
     }
 
     @Test
-    @DisplayName("targetQty 미만 생산 입력 시 '생산 진행 중' 메시지가 출력된다")
-    void 생산_진행_중간() {
-        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 0);
-        sampleRepo.save(sample);
-        Order order = producingOrder(sample, 5);
-        ProductionJob job = new ProductionJob("JOB-0001", order, 5);
-        int targetQty = job.getTargetQty();
-        queueRepo.enqueue(job);
-
+    @DisplayName("메뉴 3 선택 시 올바른 메뉴 안내 후 종료된다")
+    void 메뉴_3선택_잘못된_선택_안내() {
         ProductionService ps = new ProductionService(queueRepo, orderRepo);
-        int partialQty = Math.max(1, targetQty - 1);
-        InputHandler input = inputOf("3", String.valueOf(partialQty), "0");
+        InputHandler input = inputOf("3", "0");
         ProductionUI ui = new ProductionUI(ps, input);
-
         ui.show();
-
-        String output = out.toString();
-        assertTrue(output.contains("생산 진행 중"), "출력: " + output);
+        assertTrue(out.toString().contains("올바른 메뉴를 선택해주세요."));
     }
 }
