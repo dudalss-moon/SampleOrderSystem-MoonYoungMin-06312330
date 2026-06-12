@@ -41,3 +41,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Sensitive config ###
+.mcp.json
+data/
