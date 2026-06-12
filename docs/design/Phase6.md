@@ -128,6 +128,7 @@ void processAutoProduction() {
     ProductionJob job = current.get();
     if (job.getStartTime() == null) {
         job.setStartTime(Instant.now());
+        queueRepo.enqueue(job);   // JDBC: start_time DB 반영 (MERGE upsert)
         return;
     }
 
@@ -136,14 +137,25 @@ void processAutoProduction() {
 
     if (newProduced > job.getProducedQty()) {
         job.produce(newProduced - job.getProducedQty());
+        queueRepo.enqueue(job);   // JDBC: producedQty DB 반영 (MERGE upsert)
     }
 
     if (job.isCompleted()) {
         completeJob(job);
-        queueRepo.peek().ifPresent(next -> next.setStartTime(Instant.now()));
+        queueRepo.peek().ifPresent(next -> {
+            next.setStartTime(Instant.now());
+            queueRepo.enqueue(next);  // JDBC: 다음 작업 start_time DB 반영
+        });
     }
 }
 ```
+
+> **JDBC 환경 주의사항:** `JdbcProductionQueueRepository.peek()`은 매 틱마다 DB에서 새 객체를 재구성한다.
+> 따라서 `job.setStartTime()` / `job.produce()` 등 인메모리 변경 후 반드시 `enqueue(job)`을 호출해야
+> 다음 틱에도 상태가 유지된다. `enqueue()`는 MERGE upsert로 구현되어 INSERT/UPDATE 양쪽 모두 처리한다.
+>
+> **InMemory 환경:** `InMemoryProductionQueueRepository.enqueue()`는 이미 큐에 존재하는 job_id라면
+> 중복 추가를 하지 않도록 멱등화(idempotent)되어 있어 동일한 `enqueue()` 호출이 안전하다.
 
 **completeJob() 로직 — DB 저장 포함:**
 
@@ -264,14 +276,23 @@ OrderService.approve(orderId)
 ```
 [매 1초] ProductionService.processAutoProduction()
   → queueRepo.peek() → 현재 작업 확인
+  → job.getStartTime() == null?
+      YES → job.setStartTime(now)
+           → queueRepo.enqueue(job)     ← JDBC: start_time DB 반영
+           → return
   → 경과 시간(초) / avgProductionTime(분) = 생산된 수량
-  → job.produce(증분) 호출
+  → newProduced > producedQty?
+      YES → job.produce(증분)
+           → queueRepo.enqueue(job)     ← JDBC: producedQty DB 반영
   → job.isCompleted()? YES
-      → sample.addStock(targetQty)       ← 재고 자동 추가
-      → order.changeStatus(CONFIRMED)    ← 주문 자동 CONFIRMED
-      → orderRepo.save(order)
+      → sample.addStock(targetQty)      ← 재고 자동 추가
+      → sampleRepo.save(sample)         ← JDBC: 재고 DB 반영
+      → order.changeStatus(CONFIRMED)   ← 주문 자동 CONFIRMED
+      → orderRepo.save(order)           ← JDBC: 주문 상태 DB 반영
       → queueRepo.dequeue()
-      → 다음 작업 있으면 startTime 기록 후 계속
+      → 다음 작업 있으면
+          → next.setStartTime(now)
+          → queueRepo.enqueue(next)     ← JDBC: 다음 작업 start_time DB 반영
 ```
 
 ### 생산 현황 조회 (UI)
