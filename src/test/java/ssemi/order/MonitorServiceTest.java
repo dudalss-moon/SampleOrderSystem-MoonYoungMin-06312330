@@ -11,6 +11,7 @@ import ssemi.order.repository.SampleRepository;
 import ssemi.order.service.MonitorService;
 
 import ssemi.order.domain.SampleStockInfo;
+import ssemi.order.domain.StockStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,33 @@ class MonitorServiceTest {
         Order order = new Order(orderId, sampleRepository.findById(sampleId).get(), customer, qty);
         orderRepository.save(order);
         return order;
+    }
+
+    @Test
+    @DisplayName("재고가 0이면 StockStatus가 DEPLETED다")
+    void 고갈_판단_정확성() {
+        sampleRepository.save(new Sample("S002", "베타칩", 20, 0.8, 0)); // stock=0
+
+        List<SampleStockInfo> infos = monitorService.getStockInfos();
+        SampleStockInfo info = infos.stream()
+            .filter(i -> i.getSample().getId().equals("S002"))
+            .findFirst().get();
+
+        assertEquals(StockStatus.DEPLETED, info.getStockStatus());
+    }
+
+    @Test
+    @DisplayName("재고가 대기주문량보다 적으면 StockStatus가 SHORTAGE다")
+    void 부족_판단_정확성() {
+        sampleRepository.save(new Sample("S003", "감마칩", 20, 0.8, 2)); // stock=2
+        Order o = reserveOrder("S003", "홍길동", 5); // pending=5 → 2 < 5
+
+        List<SampleStockInfo> infos = monitorService.getStockInfos();
+        SampleStockInfo info = infos.stream()
+            .filter(i -> i.getSample().getId().equals("S003"))
+            .findFirst().get();
+
+        assertEquals(StockStatus.SHORTAGE, info.getStockStatus());
     }
 
     @Test
