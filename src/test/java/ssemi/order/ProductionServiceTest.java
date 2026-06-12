@@ -73,4 +73,14 @@ class ProductionServiceTest {
 
         assertEquals(OrderStatus.CONFIRMED, job.getOrder().getStatus());
     }
+
+    @Test
+    @DisplayName("생산 완료 후 해당 작업이 큐에서 제거된다")
+    void 생산_완료_큐에서_제거() {
+        ProductionJob job = enqueueJob("S001", 0, 4);
+
+        productionService.processProduction(job.getTargetQty());
+
+        assertTrue(productionService.getCurrentJob().isEmpty());
+    }
 }
