@@ -51,4 +51,14 @@ class ReleaseServiceTest {
         assertEquals(2, confirmed.size());
         assertTrue(confirmed.stream().allMatch(o -> o.getStatus() == OrderStatus.CONFIRMED));
     }
+
+    @Test
+    @DisplayName("release() 호출 시 주문 상태가 RELEASE로 변경된다")
+    void 출고_처리_RELEASE_전환() {
+        Order order = saveConfirmedOrder("S001", 10, 3);
+
+        releaseService.release(order.getOrderId());
+
+        assertEquals(OrderStatus.RELEASE, order.getStatus());
+    }
 }
