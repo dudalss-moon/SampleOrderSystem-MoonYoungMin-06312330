@@ -775,6 +775,10 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 
 > `ScheduledExecutorService` 기반 백그라운드 자동 생산.  
 > `avgProductionTime(분)` = 실제 `N초`로 압축 시뮬레이션 (1분 → 1초).
+>
+> **버그 수정 (2026-06-12):** `ProductionService.completeJob()`에 `SampleRepository` 의존성 추가 및
+> `sampleRepository.save()` / `orderRepository.save()` 호출 추가.
+> `ConsoleMenu` 5-arg 생성자로 스케줄러 활성화, `run()` 종료 시 `shutdown()` 자동 호출.
 
 ### 사이클 1 — ProductionJob: startTime 필드
 
