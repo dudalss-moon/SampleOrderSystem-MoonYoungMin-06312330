@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase8 완료)
+> 최종 업데이트: 2026-06-12 (Phase9 테스트 커버리지 보강 완료)
 
 ## 전체 진행률
 
@@ -13,6 +13,7 @@ Phase5 ██████████ 완료
 Phase6 ██████████ 완료
 Phase7 ██████████ 완료
 Phase8 ██████████ 완료
+Phase9 ██████████ 완료
 ```
 
 ---
@@ -274,6 +275,31 @@ Phase8 ██████████ 완료
 
 ---
 
+### ✅ Phase9 — 테스트 커버리지 보강 `완료` (2026-06-12)
+
+| 항목 | 내용 |
+|------|------|
+| 설계 문서 | [Phase9.md](docs/design/Phase9.md) |
+| 테스트 | 50 / 50 통과 (전체 148 / 148) |
+
+**신규 테스트 파일 (11개)**
+
+| 파일 | 테스트 수 | 대상 |
+|------|----------|------|
+| `ProductionResultTest` | 2 | 값 객체 직접 검증 |
+| `InMemoryOrderRepositoryTest` | 4 | 구현체 엣지케이스 |
+| `InMemoryProductionQueueRepositoryTest` | 4 | FIFO·방어적 복사 |
+| `InMemorySampleRepositoryTest` | 4 | 집계 메서드 |
+| `InputHandlerTest` | 5 | readString·readDouble·재입력 루프 |
+| `ConsoleMenuTest` | 5 | 메인 메뉴 UI |
+| `SampleUITest` | 6 | 시료 관리 UI |
+| `OrderUITest` | 7 | 주문 UI |
+| `MonitorUITest` | 4 | 모니터링 UI |
+| `ProductionUITest` | 5 | 생산 라인 UI |
+| `ReleaseUITest` | 4 | 출고 처리 UI |
+
+---
+
 ### ✅ Phase8 — DB 연동 (H2 JDBC) `완료` (2026-06-12)
 
 | 항목 | 내용 |
@@ -336,7 +362,8 @@ Phase8 ██████████ 완료
 | Phase6 | `ProductionServiceTest` | 9 | 9 | 100% |
 | Phase7 | `OrderTest`, `ReleaseServiceTest` | 12 | 12 | 100% |
 | Phase8 | `DatabaseConfigTest`, `SchemaInitializerTest`, `JdbcSampleRepositoryTest`, `JdbcOrderRepositoryTest`, `JdbcProductionQueueRepositoryTest`, `DbPersistenceIntegrationTest` | 17 | 17 | 100% |
-| **합계** | | **98** | **98** | **100%** |
+| Phase9 | `ProductionResultTest`, `InMemoryOrderRepositoryTest`, `InMemoryProductionQueueRepositoryTest`, `InMemorySampleRepositoryTest`, `InputHandlerTest`, `ConsoleMenuTest`, `SampleUITest`, `OrderUITest`, `MonitorUITest`, `ProductionUITest`, `ReleaseUITest` | 50 | 50 | 100% |
+| **합계** | | **148** | **148** | **100%** |
 
 ---
 
