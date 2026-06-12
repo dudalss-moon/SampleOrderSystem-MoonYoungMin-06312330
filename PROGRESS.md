@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase6 완료)
+> 최종 업데이트: 2026-06-12 (Phase7 완료)
 
 ## 전체 진행률
 
@@ -11,7 +11,7 @@ Phase3 ██████████ 완료
 Phase4 ██████████ 완료
 Phase5 ██████████ 완료
 Phase6 ██████████ 완료
-Phase7 ░░░░░░░░░░ 미시작
+Phase7 ██████████ 완료
 ```
 
 ---
@@ -235,27 +235,39 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase7 — 출고처리 `미시작`
+### ✅ Phase7 — 출고처리 `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase7.md](docs/design/Phase7.md) |
-| 테스트 | 0 / 10 |
+| 테스트 | 12 / 12 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `domain/Order.java` | stockDeducted 플래그 추가 |
-| `service/ReleaseService.java` | findConfirmed / release |
-| `ui/ReleaseUI.java` | 출고 처리 화면 |
+| `domain/Order.java` | `stockDeducted` 플래그, `isStockDeducted()` / `markStockDeducted()` 추가 |
+| `service/OrderService.java` | `approve()` 재고 충분 분기에 `markStockDeducted()` 추가 |
+| `service/ReleaseService.java` | `findConfirmed()` / `release()` 구현 (차감 분기 포함) |
+| `ui/ReleaseUI.java` | 출고 대기 목록 / 출고 처리 화면 |
+| `ui/ConsoleMenu.java` | 메뉴 4번 ReleaseUI 라우팅 연결 |
 
-**예정 테스트 케이스 (10건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `ReleaseServiceTest` | 7 | RELEASE 전환, 차감 분기, 예외 처리 |
-| 통합 시나리오 | 3 | 재고충분/부족 전체 흐름, 복수 주문 출고 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `OrderTest` | `stockDeducted_기본값_false` | ✅ PASS |
+| 2 | `OrderTest` | `markStockDeducted_호출_후_true` | ✅ PASS |
+| 3 | `ReleaseServiceTest` | `CONFIRMED_주문_목록_조회` | ✅ PASS |
+| 4 | `ReleaseServiceTest` | `출고_처리_RELEASE_전환` | ✅ PASS |
+| 5 | `ReleaseServiceTest` | `재고부족_경로_출고_재고차감` | ✅ PASS |
+| 6 | `ReleaseServiceTest` | `재고충분_경로_출고_차감없음` | ✅ PASS |
+| 7 | `ReleaseServiceTest` | `CONFIRMED_아닌_주문_출고_예외` | ✅ PASS |
+| 8 | `ReleaseServiceTest` | `존재하지않는_주문_출고_예외` | ✅ PASS |
+| 9 | `ReleaseServiceTest` | `출고_후_CONFIRMED_목록에서_제거` | ✅ PASS |
+| 10 | `ReleaseServiceTest` | `전체_흐름_재고충분` | ✅ PASS |
+| 11 | `ReleaseServiceTest` | `전체_흐름_재고부족` | ✅ PASS |
+| 12 | `ReleaseServiceTest` | `복수_주문_순차_출고` | ✅ PASS |
 
 ---
 
@@ -269,8 +281,8 @@ Phase7 ░░░░░░░░░░ 미시작
 | Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 12 | 12 | 100% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 11 | 11 | 100% |
 | Phase6 | `ProductionServiceTest` | 9 | 9 | 100% |
-| Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **69** | **81** | **85%** |
+| Phase7 | `OrderTest`, `ReleaseServiceTest` | 12 | 12 | 100% |
+| **합계** | | **81** | **81** | **100%** |
 
 ---
 

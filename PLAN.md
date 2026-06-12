@@ -15,7 +15,7 @@
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
-| Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 진행중 |
+| Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 완료 |
 
 ## 아키텍처 원칙
 - 계층 구조: `ui` → `service` → `domain` → `repository`
