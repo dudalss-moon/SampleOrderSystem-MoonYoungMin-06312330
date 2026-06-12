@@ -50,7 +50,7 @@ class OrderUITest {
     }
 
     private ProductionService newProductionService() {
-        return new ProductionService(queueRepo, orderRepo);
+        return new ProductionService(queueRepo, orderRepo, sampleRepo);
     }
 
     private OrderService newOrderService(ProductionService ps) {

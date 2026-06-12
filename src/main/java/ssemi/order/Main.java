@@ -26,7 +26,7 @@ public final class Main {
         ProductionQueueRepository queueRepository = new JdbcProductionQueueRepository(conn, orderRepository);
 
         InputHandler inputHandler = new InputHandler();
-        ConsoleMenu menu = new ConsoleMenu(inputHandler, sampleRepository, orderRepository, queueRepository);
+        ConsoleMenu menu = new ConsoleMenu(inputHandler, sampleRepository, orderRepository, queueRepository, 1000L);
         menu.run();
 
         dbConfig.close();

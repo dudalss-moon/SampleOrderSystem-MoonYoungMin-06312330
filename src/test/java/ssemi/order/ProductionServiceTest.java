@@ -24,12 +24,14 @@ class ProductionServiceTest {
     private ProductionService productionService;
     private ProductionQueueRepository productionQueueRepo;
     private OrderRepository orderRepository;
+    private SampleRepository sampleRepository;
 
     @BeforeEach
     void setUp() {
         productionQueueRepo = new InMemoryProductionQueueRepository();
         orderRepository = new InMemoryOrderRepository();
-        productionService = new ProductionService(productionQueueRepo, orderRepository);
+        sampleRepository = new InMemorySampleRepository();
+        productionService = new ProductionService(productionQueueRepo, orderRepository, sampleRepository);
     }
 
     private ProductionJob enqueueJob(String sampleId, int stock, int quantity) {

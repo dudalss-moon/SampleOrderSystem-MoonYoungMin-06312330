@@ -6,6 +6,7 @@ import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.ProductionResult;
 import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
+import ssemi.order.repository.SampleRepository;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -19,17 +20,22 @@ public final class ProductionService {
 
     private final ProductionQueueRepository productionQueueRepo;
     private final OrderRepository orderRepository;
+    private final SampleRepository sampleRepository;
     private final ScheduledExecutorService scheduler;
 
-    public ProductionService(ProductionQueueRepository productionQueueRepo, OrderRepository orderRepository) {
+    public ProductionService(ProductionQueueRepository productionQueueRepo, OrderRepository orderRepository,
+                             SampleRepository sampleRepository) {
         this.productionQueueRepo = productionQueueRepo;
         this.orderRepository = orderRepository;
+        this.sampleRepository = sampleRepository;
         this.scheduler = null;
     }
 
-    public ProductionService(ProductionQueueRepository productionQueueRepo, OrderRepository orderRepository, long periodMillis) {
+    public ProductionService(ProductionQueueRepository productionQueueRepo, OrderRepository orderRepository,
+                             SampleRepository sampleRepository, long periodMillis) {
         this.productionQueueRepo = productionQueueRepo;
         this.orderRepository = orderRepository;
+        this.sampleRepository = sampleRepository;
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.scheduler.scheduleAtFixedRate(
             this::processAutoProduction,
@@ -74,8 +80,11 @@ public final class ProductionService {
     }
 
     public void completeJob(ProductionJob job) {
-        job.getOrder().getSample().addStock(job.getTargetQty());
-        job.getOrder().changeStatus(OrderStatus.CONFIRMED);
+        Order order = job.getOrder();
+        order.getSample().addStock(job.getTargetQty());
+        sampleRepository.save(order.getSample());
+        order.changeStatus(OrderStatus.CONFIRMED);
+        orderRepository.save(order);
         productionQueueRepo.dequeue();
     }
 

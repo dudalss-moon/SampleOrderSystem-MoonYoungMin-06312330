@@ -126,7 +126,7 @@ class ReleaseServiceTest {
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 10);
         sampleRepository.save(sample);
         OrderService orderService = new OrderService(orderRepository, sampleRepository,
-            new ProductionService(new InMemoryProductionQueueRepository(), orderRepository));
+            new ProductionService(new InMemoryProductionQueueRepository(), orderRepository, sampleRepository));
 
         Order order = orderService.reserve("S001", "홍길동", 5);
         orderService.approve(order.getOrderId()); // CONFIRMED, stock=5, stockDeducted=true 이어야 함
@@ -146,7 +146,7 @@ class ReleaseServiceTest {
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 2);
         sampleRepository.save(sample);
         ProductionQueueRepository productionQueueRepo = new InMemoryProductionQueueRepository();
-        ProductionService productionService = new ProductionService(productionQueueRepo, orderRepository);
+        ProductionService productionService = new ProductionService(productionQueueRepo, orderRepository, sampleRepository);
         OrderService orderService = new OrderService(orderRepository, sampleRepository, productionService);
 
         Order order = orderService.reserve("S001", "홍길동", 5);

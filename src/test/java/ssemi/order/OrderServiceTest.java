@@ -32,7 +32,7 @@ class OrderServiceTest {
         OrderRepository orderRepository = new InMemoryOrderRepository();
         orderService = new OrderService(
             orderRepository, sampleRepository,
-            new ProductionService(productionQueueRepo, orderRepository)
+            new ProductionService(productionQueueRepo, orderRepository, sampleRepository)
         );
         sampleRepository.save(new Sample("S001", "알파센서", 30, 0.9, 10));
     }

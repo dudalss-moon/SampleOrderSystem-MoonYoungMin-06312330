@@ -10,6 +10,7 @@ import ssemi.order.domain.ProductionJob;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.inmemory.InMemoryProductionQueueRepository;
+import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.service.ProductionService;
 
 import java.time.Instant;
@@ -22,12 +23,14 @@ class AutoProductionServiceTest {
     private ProductionService productionService;
     private InMemoryProductionQueueRepository queueRepo;
     private InMemoryOrderRepository orderRepo;
+    private InMemorySampleRepository sampleRepo;
 
     @BeforeEach
     void setUp() {
         queueRepo = new InMemoryProductionQueueRepository();
         orderRepo = new InMemoryOrderRepository();
-        productionService = new ProductionService(queueRepo, orderRepo);
+        sampleRepo = new InMemorySampleRepository();
+        productionService = new ProductionService(queueRepo, orderRepo, sampleRepo);
     }
 
     private ProductionJob enqueueJob(int avgTime, int stock, int quantity) {
@@ -82,7 +85,7 @@ class AutoProductionServiceTest {
     @Test
     @DisplayName("shutdown 호출 후 스케줄러가 종료된다")
     void shutdown_후_스케줄러_종료() {
-        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, 100L);
+        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, sampleRepo, 100L);
         scheduledService.shutdown();
         assertTrue(scheduledService.isSchedulerShutdown());
     }
@@ -91,7 +94,7 @@ class AutoProductionServiceTest {
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
     @DisplayName("createJob 후 실제 시간 경과 시 자동으로 생산이 완료된다")
     void createJob_후_스케줄러_자동생산_완료() throws InterruptedException {
-        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, 50L);
+        ProductionService scheduledService = new ProductionService(queueRepo, orderRepo, sampleRepo, 50L);
         try {
             Sample sample = new Sample("S001", "알파센서", 1, 0.9, 0);
             String orderId = orderRepo.generateId();

@@ -61,7 +61,7 @@ class ProductionUITest {
     @Test
     @DisplayName("생산 큐가 비어있을 때 현재 작업 조회 시 '현재 생산 중인 작업이 없습니다' 메시지가 출력된다")
     void 현재_작업_없음() {
-        ProductionService ps = new ProductionService(queueRepo, orderRepo);
+        ProductionService ps = new ProductionService(queueRepo, orderRepo, sampleRepo);
         InputHandler input = inputOf("1", "0");
         ProductionUI ui = new ProductionUI(ps, input);
 
@@ -80,7 +80,7 @@ class ProductionUITest {
         ProductionJob job = new ProductionJob("JOB-0001", order, 5);
         queueRepo.enqueue(job);
 
-        ProductionService ps = new ProductionService(queueRepo, orderRepo);
+        ProductionService ps = new ProductionService(queueRepo, orderRepo, sampleRepo);
         InputHandler input = inputOf("1", "0");
         ProductionUI ui = new ProductionUI(ps, input);
 
@@ -94,7 +94,7 @@ class ProductionUITest {
     @Test
     @DisplayName("생산 대기 목록이 비어있을 때 '대기 중인 작업이 없습니다' 메시지가 출력된다")
     void 대기_목록_빈_경우() {
-        ProductionService ps = new ProductionService(queueRepo, orderRepo);
+        ProductionService ps = new ProductionService(queueRepo, orderRepo, sampleRepo);
         InputHandler input = inputOf("2", "0");
         ProductionUI ui = new ProductionUI(ps, input);
 
@@ -107,7 +107,7 @@ class ProductionUITest {
     @Test
     @DisplayName("생산 라인 메뉴에 '생산 진행' 항목이 표시되지 않는다")
     void 메뉴_생산진행_항목_없음() {
-        ProductionService ps = new ProductionService(queueRepo, orderRepo);
+        ProductionService ps = new ProductionService(queueRepo, orderRepo, sampleRepo);
         InputHandler input = inputOf("0");
         ProductionUI ui = new ProductionUI(ps, input);
         ui.show();
@@ -117,7 +117,7 @@ class ProductionUITest {
     @Test
     @DisplayName("메뉴 3 선택 시 올바른 메뉴 안내 후 종료된다")
     void 메뉴_3선택_잘못된_선택_안내() {
-        ProductionService ps = new ProductionService(queueRepo, orderRepo);
+        ProductionService ps = new ProductionService(queueRepo, orderRepo, sampleRepo);
         InputHandler input = inputOf("3", "0");
         ProductionUI ui = new ProductionUI(ps, input);
         ui.show();

@@ -19,33 +19,46 @@ public final class ConsoleMenu {
     private final MonitorUI monitorUI;
     private final ReleaseUI releaseUI;
     private final ProductionUI productionUI;
+    private final ProductionService productionService;
 
     public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository) {
-        this(input, sampleRepository, orderRepository, new InMemoryProductionQueueRepository());
+        this(input, sampleRepository, orderRepository, new InMemoryProductionQueueRepository(), 0L);
     }
 
     public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository,
                        ProductionQueueRepository productionQueueRepository) {
+        this(input, sampleRepository, orderRepository, productionQueueRepository, 0L);
+    }
+
+    public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository,
+                       ProductionQueueRepository productionQueueRepository, long schedulerPeriodMillis) {
         this.input = input;
         this.sampleRepository = sampleRepository;
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
-        ProductionService productionService = new ProductionService(productionQueueRepository, orderRepository);
-        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), productionService, input);
+        ProductionService ps = schedulerPeriodMillis > 0
+            ? new ProductionService(productionQueueRepository, orderRepository, sampleRepository, schedulerPeriodMillis)
+            : new ProductionService(productionQueueRepository, orderRepository, sampleRepository);
+        this.productionService = ps;
+        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, ps), ps, input);
         this.monitorUI = new MonitorUI(new MonitorService(orderRepository, sampleRepository), input);
         this.releaseUI = new ReleaseUI(new ReleaseService(orderRepository, sampleRepository), input);
-        this.productionUI = new ProductionUI(productionService, input);
+        this.productionUI = new ProductionUI(ps, input);
     }
 
     public void run() {
-        while (true) {
-            displaySummary();
-            displayMainMenu();
-            int choice = readChoice();
-            if (choice == 0) {
-                System.out.println("시스템을 종료합니다.");
-                break;
+        try {
+            while (true) {
+                displaySummary();
+                displayMainMenu();
+                int choice = readChoice();
+                if (choice == 0) {
+                    System.out.println("시스템을 종료합니다.");
+                    break;
+                }
+                route(choice);
             }
-            route(choice);
+        } finally {
+            productionService.shutdown();
         }
     }
 
