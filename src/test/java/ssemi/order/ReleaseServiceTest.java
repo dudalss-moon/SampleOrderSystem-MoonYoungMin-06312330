@@ -160,4 +160,20 @@ class ReleaseServiceTest {
             () -> assertEquals(stockAfterProduction - 5, sample.getStock())
         );
     }
+
+    @Test
+    @DisplayName("여러 CONFIRMED 주문을 순차적으로 출고할 수 있다")
+    void 복수_주문_순차_출고() {
+        Order order1 = saveConfirmedOrder("S001", 10, 3);
+        Order order2 = saveConfirmedOrder("S002", 10, 5);
+
+        releaseService.release(order1.getOrderId());
+        releaseService.release(order2.getOrderId());
+
+        assertAll(
+            () -> assertEquals(OrderStatus.RELEASE, order1.getStatus()),
+            () -> assertEquals(OrderStatus.RELEASE, order2.getStatus()),
+            () -> assertTrue(releaseService.findConfirmed().isEmpty())
+        );
+    }
 }
