@@ -14,7 +14,7 @@
 | Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
-| Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 미시작 |
+| Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 진행중 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 미시작 |
 
 ## 아키텍처 원칙
@@ -462,3 +462,72 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** stock=2, RESERVED 수량=5인 시료
 - **기대 결과:** `stockStatus == SHORTAGE`
 - **커버 요구사항:** Phase5.md § 재고 상태 판단 기준
+
+---
+
+## Phase6 TDD 계획
+
+> `getCurrentJob()` / `getQueueList()`는 Phase4에서 이미 구현됨.
+> Phase6은 `processProduction()` / `completeJob()` 구현 및 통합 시나리오에 집중.
+
+### [ProductionServiceTest] 사이클 1: 생산 진행 미완료
+- **메서드명:** `생산_진행_미완료`
+- **@DisplayName:** `"processProduction 호출 후 목표 미달 시 isCompleted는 false이고 producedQty가 증가한다"`
+- **입력:** targetQty=4, processProduction(2) 호출
+- **기대 결과:** `isCompleted()==false`, `producedQty==2`
+- **커버 요구사항:** Phase6.md § 생산 진행 처리
+
+### [ProductionServiceTest] 사이클 2: 생산 진행 완료 재고 증가
+- **메서드명:** `생산_진행_완료_재고증가`
+- **@DisplayName:** `"생산 완료 시 sample.stock에 targetQty가 추가된다"`
+- **입력:** stock=2, targetQty=4, processProduction(4) 호출
+- **기대 결과:** `sample.getStock() == 6`
+- **커버 요구사항:** Phase6.md § 생산 완료 처리 > addStock
+
+### [ProductionServiceTest] 사이클 3: 생산 완료 주문 상태 CONFIRMED
+- **메서드명:** `생산_완료_주문상태_CONFIRMED`
+- **@DisplayName:** `"생산 완료 시 주문 상태가 CONFIRMED로 변경된다"`
+- **입력:** PRODUCING 상태 주문, processProduction(targetQty)
+- **기대 결과:** `order.getStatus() == CONFIRMED`
+- **커버 요구사항:** Phase6.md § 생산 완료 처리 > changeStatus(CONFIRMED)
+
+### [ProductionServiceTest] 사이클 4: 생산 완료 큐에서 제거
+- **메서드명:** `생산_완료_큐에서_제거`
+- **@DisplayName:** `"생산 완료 후 해당 작업이 큐에서 제거된다"`
+- **입력:** 작업 1개 등록 후 processProduction(targetQty)
+- **기대 결과:** `getCurrentJob().isEmpty()`
+- **커버 요구사항:** Phase6.md § 생산 완료 처리 > dequeue
+
+### [ProductionServiceTest] 사이클 5: 복수 큐 완료 후 다음 작업 자동 시작
+- **메서드명:** `생산_완료_다음_작업_자동시작`
+- **@DisplayName:** `"2개 작업 등록 후 첫 번째 완료 시 다음 작업을 peek할 수 있다"`
+- **입력:** job1, job2 enqueue 후 job1 완료
+- **기대 결과:** `getCurrentJob().get() == job2`
+- **커버 요구사항:** Phase6.md § 생산 완료 처리 > 다음 작업
+
+### [ProductionServiceTest] 사이클 6: 생산 큐 없을 때 진행 예외
+- **메서드명:** `생산_큐_없을때_진행_예외`
+- **@DisplayName:** `"큐가 비어있을 때 processProduction 호출 시 IllegalStateException이 발생한다"`
+- **기대 결과:** `IllegalStateException`
+- **커버 요구사항:** Phase6.md § ProductionService > processProduction
+
+### [ProductionServiceTest] 사이클 7: 생산량 초과 입력 처리
+- **메서드명:** `생산량_초과_입력_처리`
+- **@DisplayName:** `"targetQty를 초과하는 수량 입력 시 targetQty로 보정된다"`
+- **입력:** targetQty=4, processProduction(10) 호출
+- **기대 결과:** `job.getProducedQty() == 4`, `isCompleted()==true`
+- **커버 요구사항:** Phase6.md § 생산 진행 처리 > 보정
+
+### [통합 시나리오] 사이클 8: 재고 부족 승인 후 생산 완료
+- **메서드명:** `재고부족_승인_후_생산_완료`
+- **@DisplayName:** `"재고 부족으로 PRODUCING된 주문이 생산 완료 후 CONFIRMED로 전환되고 재고가 증가한다"`
+- **입력:** stock=2, quantity=5 → approve(재고 부족) → processProduction(targetQty)
+- **기대 결과:** `order.getStatus()==CONFIRMED`, `sample.getStock() >= 5`
+- **커버 요구사항:** Phase6.md § 재고 흐름 정의
+
+### [통합 시나리오] 사이클 9: 복수 생산 큐 FIFO 처리
+- **메서드명:** `복수_생산_큐_FIFO_처리`
+- **@DisplayName:** `"2개 작업이 등록된 큐에서 FIFO 순서대로 처리된다"`
+- **입력:** job1, job2 enqueue 후 job1 완료 → job2 완료
+- **기대 결과:** job1 order CONFIRMED → job2 order CONFIRMED, 큐 비어있음
+- **커버 요구사항:** Phase6.md § ProductionService > FIFO 처리
