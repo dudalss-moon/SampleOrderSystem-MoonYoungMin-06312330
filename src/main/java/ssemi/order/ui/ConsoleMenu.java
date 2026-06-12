@@ -1,6 +1,8 @@
 package ssemi.order.ui;
 
+import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.service.OrderService;
 import ssemi.order.service.SampleService;
 
 public final class ConsoleMenu {
@@ -8,11 +10,13 @@ public final class ConsoleMenu {
     private final InputHandler input;
     private final SampleRepository sampleRepository;
     private final SampleUI sampleUI;
+    private final OrderUI orderUI;
 
-    public ConsoleMenu(InputHandler input, SampleRepository sampleRepository) {
+    public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository) {
         this.input = input;
         this.sampleRepository = sampleRepository;
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
+        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository), input);
     }
 
     public void run() {
@@ -56,7 +60,7 @@ public final class ConsoleMenu {
     private void route(int choice) {
         switch (choice) {
             case 1 -> sampleUI.show();
-            case 2 -> System.out.println("[주문 관리] - 준비 중");
+            case 2 -> orderUI.show();
             case 3 -> System.out.println("[모니터링] - 준비 중");
             case 4 -> System.out.println("[출고 처리] - 준비 중");
             case 5 -> System.out.println("[생산 라인] - 준비 중");
