@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public final class DatabaseConfig {
+public final class DatabaseConfig implements AutoCloseable {
 
     private final Connection connection;
 
