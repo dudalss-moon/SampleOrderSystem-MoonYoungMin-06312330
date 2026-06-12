@@ -2,6 +2,7 @@ package ssemi.order.ui;
 
 import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
+import ssemi.order.repository.inmemory.InMemoryProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
 import ssemi.order.service.MonitorService;
 import ssemi.order.service.OrderService;
@@ -20,10 +21,15 @@ public final class ConsoleMenu {
     private final ProductionUI productionUI;
 
     public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository) {
+        this(input, sampleRepository, orderRepository, new InMemoryProductionQueueRepository());
+    }
+
+    public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository,
+                       ProductionQueueRepository productionQueueRepository) {
         this.input = input;
         this.sampleRepository = sampleRepository;
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
-        ProductionService productionService = new ProductionService(new ProductionQueueRepository(), orderRepository);
+        ProductionService productionService = new ProductionService(productionQueueRepository, orderRepository);
         this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), productionService, input);
         this.monitorUI = new MonitorUI(new MonitorService(orderRepository, sampleRepository), input);
         this.releaseUI = new ReleaseUI(new ReleaseService(orderRepository, sampleRepository), input);

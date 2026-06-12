@@ -7,8 +7,11 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
+import ssemi.order.repository.inmemory.InMemoryProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.service.OrderService;
 import ssemi.order.service.ProductionService;
 import ssemi.order.service.ReleaseService;
@@ -25,8 +28,8 @@ class ReleaseServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderRepository = new OrderRepository();
-        sampleRepository = new SampleRepository();
+        orderRepository = new InMemoryOrderRepository();
+        sampleRepository = new InMemorySampleRepository();
         releaseService = new ReleaseService(orderRepository, sampleRepository);
     }
 
@@ -123,7 +126,7 @@ class ReleaseServiceTest {
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 10);
         sampleRepository.save(sample);
         OrderService orderService = new OrderService(orderRepository, sampleRepository,
-            new ProductionService(new ProductionQueueRepository(), orderRepository));
+            new ProductionService(new InMemoryProductionQueueRepository(), orderRepository));
 
         Order order = orderService.reserve("S001", "홍길동", 5);
         orderService.approve(order.getOrderId()); // CONFIRMED, stock=5, stockDeducted=true 이어야 함
@@ -142,7 +145,7 @@ class ReleaseServiceTest {
         // stock=2, qty=5 → approve(PRODUCING) → processProduction → release(출고 시 차감)
         Sample sample = new Sample("S001", "알파센서", 30, 0.9, 2);
         sampleRepository.save(sample);
-        ProductionQueueRepository productionQueueRepo = new ProductionQueueRepository();
+        ProductionQueueRepository productionQueueRepo = new InMemoryProductionQueueRepository();
         ProductionService productionService = new ProductionService(productionQueueRepo, orderRepository);
         OrderService orderService = new OrderService(orderRepository, sampleRepository, productionService);
 

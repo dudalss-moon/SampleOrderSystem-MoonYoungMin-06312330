@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ssemi.order.domain.Sample;
-import ssemi.order.repository.SampleRepository;
+import ssemi.order.repository.inmemory.InMemorySampleRepository;
 import ssemi.order.service.SampleService;
 
 import java.util.List;
@@ -17,7 +17,7 @@ class SampleServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SampleService(new SampleRepository());
+        service = new SampleService(new InMemorySampleRepository());
     }
 
     @Test

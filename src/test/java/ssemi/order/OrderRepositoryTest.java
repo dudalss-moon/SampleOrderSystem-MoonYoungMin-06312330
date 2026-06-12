@@ -7,6 +7,7 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.inmemory.InMemoryOrderRepository;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ class OrderRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new OrderRepository();
+        repository = new InMemoryOrderRepository();
         sample = new Sample("S001", "알파센서", 30, 0.9, 10);
     }
 

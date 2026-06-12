@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.repository.inmemory.InMemorySampleRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ class SampleRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new SampleRepository();
+        repository = new InMemorySampleRepository();
     }
 
     @Test

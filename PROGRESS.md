@@ -1,6 +1,6 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12 (Phase7 완료)
+> 최종 업데이트: 2026-06-12 (Phase8 완료)
 
 ## 전체 진행률
 
@@ -12,6 +12,7 @@ Phase4 ██████████ 완료
 Phase5 ██████████ 완료
 Phase6 ██████████ 완료
 Phase7 ██████████ 완료
+Phase8 ██████████ 완료
 ```
 
 ---
@@ -271,6 +272,58 @@ Phase7 ██████████ 완료
 
 ---
 
+---
+
+### ✅ Phase8 — DB 연동 (H2 JDBC) `완료` (2026-06-12)
+
+| 항목 | 내용 |
+|------|------|
+| 설계 문서 | [Phase8.md](docs/design/Phase8.md) |
+| 브랜치 | `feature/phase8-db-jdbc` |
+| 테스트 | 17 / 17 통과 (전체 98 / 98) |
+
+**구현 파일**
+
+| 파일 | 역할 |
+|------|------|
+| `db/DatabaseConfig.java` | H2 JDBC 연결 관리 (`AutoCloseable`) |
+| `db/SchemaInitializer.java` | DDL 멱등 초기화 (4개 테이블 + sequences) |
+| `repository/SampleRepository.java` | 인터페이스로 변환 |
+| `repository/OrderRepository.java` | 인터페이스로 변환 |
+| `repository/ProductionQueueRepository.java` | 인터페이스로 변환 |
+| `repository/inmemory/InMemorySampleRepository.java` | 기존 인메모리 구현 분리 |
+| `repository/inmemory/InMemoryOrderRepository.java` | 기존 인메모리 구현 분리 |
+| `repository/inmemory/InMemoryProductionQueueRepository.java` | 기존 인메모리 구현 분리 |
+| `repository/jdbc/JdbcSampleRepository.java` | H2 JDBC 시료 저장소 (MERGE INTO upsert) |
+| `repository/jdbc/JdbcOrderRepository.java` | H2 JDBC 주문 저장소 (JOIN 재구성, sequences ID) |
+| `repository/jdbc/JdbcProductionQueueRepository.java` | H2 JDBC 생산큐 저장소 (FIFO enqueue_order) |
+| `domain/ProductionJob.java` | `restore()` 정적 팩토리 추가 (DB 재구성용) |
+| `Main.java` | H2 파일DB + JDBC 구현체로 전환 |
+
+**TDD 테스트 케이스**
+
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `DatabaseConfigTest` | `데이터베이스_연결_정상` | ✅ PASS |
+| 2 | `SchemaInitializerTest` | `스키마_초기화_테이블_생성` | ✅ PASS |
+| 3 | `SchemaInitializerTest` | `스키마_중복_초기화_오류없음` | ✅ PASS |
+| 4 | `JdbcSampleRepositoryTest` | `시료_저장_후_ID로_조회` | ✅ PASS |
+| 5 | `JdbcSampleRepositoryTest` | `재고_변경_DB_반영` | ✅ PASS |
+| 6 | `JdbcSampleRepositoryTest` | `전체_시료_조회_등록순_보장` | ✅ PASS |
+| 7 | `JdbcSampleRepositoryTest` | `이름_부분일치_검색` | ✅ PASS |
+| 8 | `JdbcSampleRepositoryTest` | `count_totalStock_정확성` | ✅ PASS |
+| 9 | `JdbcOrderRepositoryTest` | `주문_저장_후_ID로_조회` | ✅ PASS |
+| 10 | `JdbcOrderRepositoryTest` | `상태_변경_DB_반영` | ✅ PASS |
+| 11 | `JdbcOrderRepositoryTest` | `stockDeducted_플래그_DB_반영` | ✅ PASS |
+| 12 | `JdbcOrderRepositoryTest` | `ID_자동생성_순번_증가` | ✅ PASS |
+| 13 | `JdbcOrderRepositoryTest` | `상태별_주문_조회` | ✅ PASS |
+| 14 | `ProductionJobTest` | `restore_정적팩토리_DB_재구성` | ✅ PASS |
+| 15 | `JdbcProductionQueueRepositoryTest` | `작업_저장_후_enqueue_순서_조회` | ✅ PASS |
+| 16 | `JdbcProductionQueueRepositoryTest` | `생산_진행_후_producedQty_DB_반영` | ✅ PASS |
+| 17 | `DbPersistenceIntegrationTest` | `DB_재연결_후_데이터_유지` | ✅ PASS |
+
+---
+
 ## 테스트 현황 요약
 
 | Phase | 테스트 파일 | 통과 | 전체 | 진행률 |
@@ -282,7 +335,8 @@ Phase7 ██████████ 완료
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 11 | 11 | 100% |
 | Phase6 | `ProductionServiceTest` | 9 | 9 | 100% |
 | Phase7 | `OrderTest`, `ReleaseServiceTest` | 12 | 12 | 100% |
-| **합계** | | **81** | **81** | **100%** |
+| Phase8 | `DatabaseConfigTest`, `SchemaInitializerTest`, `JdbcSampleRepositoryTest`, `JdbcOrderRepositoryTest`, `JdbcProductionQueueRepositoryTest`, `DbPersistenceIntegrationTest` | 17 | 17 | 100% |
+| **합계** | | **98** | **98** | **100%** |
 
 ---
 

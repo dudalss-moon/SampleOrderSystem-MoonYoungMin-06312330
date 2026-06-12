@@ -9,13 +9,14 @@
 
 | Phase | 기능 | 설계 문서 | 상태 |
 |-------|------|-----------|------|
-| Phase1 | 기반 구조 + 메인 메뉴 | [Phase1.md](docs/design/Phase1.md) | 미시작 |
-| Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 미시작 |
-| Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
+| Phase1 | 기반 구조 + 메인 메뉴 | [Phase1.md](docs/design/Phase1.md) | 완료 |
+| Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 완료 |
+| Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 완료 |
 | Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 완료 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 완료 |
+| Phase8 | DB 연동 (H2 JDBC) | [Phase8.md](docs/design/Phase8.md) | 완료 |
 
 ## 아키텍처 원칙
 - 계층 구조: `ui` → `service` → `domain` → `repository`
@@ -618,3 +619,115 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 - **입력:** CONFIRMED 2건 → 각각 release()
 - **기대 결과:** 모두 RELEASE, findConfirmed() 빈 리스트
 - **커버 요구사항:** Phase7.md § 복수 주문 출고
+
+---
+
+## Phase8 TDD 계획 (현재 진행)
+
+### 현재 사이클: 18 / 18
+
+### [DatabaseConfigTest] 사이클 1: DB 연결 정상 ✅
+- **메서드명:** `데이터베이스_연결_정상` — PASS
+
+### [SchemaInitializerTest] 사이클 2: 스키마 초기화 테이블 생성 ✅
+- **메서드명:** `스키마_초기화_테이블_생성` — PASS
+
+### [SchemaInitializerTest] 사이클 3: 중복 초기화 오류 없음 ✅
+- **메서드명:** `스키마_중복_초기화_오류없음` — PASS
+
+### [JdbcSampleRepositoryTest] 사이클 4: 시료 저장 후 조회
+- **메서드명:** `시료_저장_후_ID로_조회`
+- **@DisplayName:** `"save 후 findById로 동일한 시료가 반환된다"`
+- **입력:** Sample(id="S001", name="알파센서", avgProductionTime=30, yield=0.9, stock=10) → save → findById("S001")
+- **기대 결과:** id, name, avgProductionTime, yield, stock 모두 일치
+- **커버 요구사항:** Phase8.md § 사이클 4
+
+**선행 리팩토링 (기존 테스트로 검증)**
+1. `SampleRepository` 인터페이스 추출
+2. 기존 `SampleRepository` → `inmemory/InMemorySampleRepository`로 이동·개명
+3. 기존 테스트·서비스의 참조 업데이트
+4. `jdbc/JdbcSampleRepository` 골격 생성
+
+### [JdbcSampleRepositoryTest] 사이클 5: 재고 변경 DB 반영 ✅
+- **메서드명:** `재고_변경_DB_반영` — PASS
+
+### [JdbcSampleRepositoryTest] 사이클 6: 전체 시료 조회 등록순 보장 ✅
+- **메서드명:** `전체_시료_조회_등록순_보장` — PASS
+
+### [JdbcSampleRepositoryTest] 사이클 7: 이름 부분 일치 검색 ✅
+- **메서드명:** `이름_부분일치_검색` — PASS
+
+### [JdbcSampleRepositoryTest] 사이클 8: count/totalStock 정확성 ✅
+- **메서드명:** `count_totalStock_정확성` — PASS
+
+### [JdbcOrderRepositoryTest] 사이클 9: 주문 저장 후 ID로 조회
+- **메서드명:** `주문_저장_후_ID로_조회`
+- **@DisplayName:** `"save 후 findById로 동일한 주문이 반환된다"`
+- **입력:** Sample+Order save → findById(orderId)
+- **기대 결과:** orderId, customerName, quantity, status, stockDeducted 일치
+- **커버 요구사항:** Phase8.md § 사이클 9
+
+**선행 리팩토링 (사이클 6~9 완료)**
+1. `OrderRepository` 인터페이스 추출 ✅
+2. `inmemory/InMemoryOrderRepository` 생성 ✅
+3. 기존 테스트·Main.java 참조 업데이트 ✅
+
+### [JdbcOrderRepositoryTest] 사이클 10: 상태 변경 DB 반영
+- **메서드명:** `상태_변경_DB_반영`
+- **@DisplayName:** `"changeStatus 후 save하면 DB의 status 값이 갱신된다"`
+- **입력:** Order(RESERVED) save → changeStatus(CONFIRMED) → save → findById
+- **기대 결과:** `status == CONFIRMED`
+- **커버 요구사항:** Phase8.md § 사이클 10
+
+### [JdbcOrderRepositoryTest] 사이클 11: stockDeducted 플래그 반영
+- **메서드명:** `stockDeducted_플래그_DB_반영`
+- **@DisplayName:** `"markStockDeducted 후 save하면 DB의 stock_deducted가 true로 저장된다"`
+- **입력:** Order save → markStockDeducted() → save → findById
+- **기대 결과:** `isStockDeducted() == true`
+- **커버 요구사항:** Phase8.md § 사이클 11
+
+### [JdbcOrderRepositoryTest] 사이클 12: ID 자동생성 순번 증가
+- **메서드명:** `ID_자동생성_순번_증가`
+- **@DisplayName:** `"generateId는 ORD-0001, ORD-0002 순으로 순번이 증가한다"`
+- **기대 결과:** 첫 번째 "ORD-0001", 두 번째 "ORD-0002"
+- **커버 요구사항:** Phase8.md § 사이클 12
+
+### [JdbcOrderRepositoryTest] 사이클 13: 상태별 주문 조회
+- **메서드명:** `상태별_주문_조회`
+- **@DisplayName:** `"findByStatus는 해당 상태의 주문만 반환한다"`
+- **입력:** RESERVED 2건, CONFIRMED 1건 저장 후 findByStatus(RESERVED)
+- **기대 결과:** 크기 2, 모두 RESERVED 상태
+- **커버 요구사항:** Phase8.md § 사이클 13
+
+### [리팩토링] 사이클 14: ProductionQueueRepository 인터페이스 추출
+- `ProductionQueueRepository` → 인터페이스로 변환
+- `InMemoryProductionQueueRepository` 생성 (기존 구현 이동) ✅
+- 기존 테스트 참조 업데이트 (컴파일 에러 → GREEN 확인) ✅
+
+### [ProductionJobTest] 사이클 15: ProductionJob.restore() 정적 팩토리
+- **메서드명:** `restore_정적팩토리_DB_재구성`
+- **@DisplayName:** `"restore()로 생성한 ProductionJob은 주입된 targetQty/producedQty/totalTime을 그대로 반환한다"`
+- **입력:** restore(jobId, order, targetQty=5, producedQty=3, totalTime=150)
+- **기대 결과:** 각 getter 일치
+- **커버 요구사항:** Phase8.md § 사이클 15
+
+### [JdbcProductionQueueRepositoryTest] 사이클 16: 작업 저장 후 enqueue 순서 조회
+- **메서드명:** `작업_저장_후_enqueue_순서_조회`
+- **@DisplayName:** `"enqueue 후 peek으로 첫 번째 작업이 반환되고 FIFO 순서가 보장된다"`
+- **입력:** job1, job2 enqueue 후 peek/dequeue
+- **기대 결과:** peek → job1, dequeue → job1, peek → job2
+- **커버 요구사항:** Phase8.md § 사이클 16
+
+### [JdbcProductionQueueRepositoryTest] 사이클 17: producedQty 업데이트 DB 반영
+- **메서드명:** `생산_진행_후_producedQty_DB_반영`
+- **@DisplayName:** `"enqueue(job) 재호출 시 producedQty가 DB에 갱신된다"`
+- **입력:** enqueue → produce(2) → enqueue(재호출) → peek
+- **기대 결과:** peek().get().getProducedQty() == 2
+- **커버 요구사항:** Phase8.md § 사이클 17
+
+### [통합 테스트] 사이클 18: DB 재연결 후 데이터 유지
+- **메서드명:** `DB_재연결_후_데이터_유지`
+- **@DisplayName:** `"DB 재연결 후에도 저장된 시료와 주문 데이터가 유지된다"`
+- **입력:** 파일 DB에 시료/주문 저장 → DB 닫기 → 재연결 → findAll
+- **기대 결과:** 재연결 후에도 동일한 데이터 반환
+- **커버 요구사항:** Phase8.md § 사이클 18
