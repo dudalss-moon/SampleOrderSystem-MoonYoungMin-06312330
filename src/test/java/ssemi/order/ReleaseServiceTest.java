@@ -102,4 +102,14 @@ class ReleaseServiceTest {
         assertThrows(IllegalArgumentException.class,
             () -> releaseService.release("NONE"));
     }
+
+    @Test
+    @DisplayName("출고 처리 후 해당 주문이 findConfirmed() 목록에서 제외된다")
+    void 출고_후_CONFIRMED_목록에서_제거() {
+        Order order = saveConfirmedOrder("S001", 10, 3);
+
+        releaseService.release(order.getOrderId());
+
+        assertTrue(releaseService.findConfirmed().isEmpty());
+    }
 }
