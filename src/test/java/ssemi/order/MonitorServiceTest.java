@@ -51,6 +51,18 @@ class MonitorServiceTest {
     }
 
     @Test
+    @DisplayName("REJECTED 상태 주문은 주문 현황에 포함되지 않는다")
+    void REJECTED_주문_제외_확인() {
+        Order o = reserveOrder("S001", "홍길동", 3);
+        o.changeStatus(OrderStatus.REJECTED);
+
+        Map<OrderStatus, List<Order>> result = monitorService.getOrdersByStatus();
+
+        assertFalse(result.containsKey(OrderStatus.REJECTED));
+        assertTrue(result.get(OrderStatus.RESERVED).isEmpty());
+    }
+
+    @Test
     @DisplayName("getOrdersByStatus는 RESERVED/PRODUCING/CONFIRMED/RELEASE 4개 키를 반환하고 REJECTED는 제외한다")
     void 주문현황_상태별_그룹핑() {
         Order o1 = reserveOrder("S001", "홍길동", 3);
