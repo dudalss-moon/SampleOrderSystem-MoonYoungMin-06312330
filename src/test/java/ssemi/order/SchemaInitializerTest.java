@@ -29,6 +29,14 @@ class SchemaInitializerTest {
     }
 
     @Test
+    @DisplayName("initialize()를 2회 호출해도 예외가 발생하지 않는다")
+    void 스키마_중복_초기화_오류없음() {
+        SchemaInitializer.initialize(config.getConnection());
+        SchemaInitializer.initialize(config.getConnection());
+        // 예외 없이 완료되면 통과
+    }
+
+    @Test
     @DisplayName("initialize() 호출 후 samples, orders, production_jobs, sequences 테이블이 존재한다")
     void 스키마_초기화_테이블_생성() throws Exception {
         SchemaInitializer.initialize(config.getConnection());
