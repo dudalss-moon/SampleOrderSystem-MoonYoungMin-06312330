@@ -118,6 +118,19 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("재고 부족 승인 시 생산 작업의 targetQty가 ceil(부족분 / (yield * 0.9))로 계산된다")
+    void 재고_부족시_생산량_계산_정확() {
+        // stock=2, quantity=10, yield=0.8 → shortage=8
+        // targetQty = ceil(8 / (0.8 * 0.9)) = ceil(8 / 0.72) = ceil(11.11) = 12
+        sampleRepository.save(new Sample("S003", "감마칩", 30, 0.8, 2));
+        Order order = orderService.reserve("S003", "이영희", 10);
+
+        orderService.approve(order.getOrderId());
+
+        assertEquals(12, productionQueueRepo.peek().get().getTargetQty());
+    }
+
+    @Test
     @DisplayName("findReserved는 RESERVED 상태 주문만 반환한다")
     void RESERVED_주문_목록_조회() {
         orderService.reserve("S001", "홍길동", 5);
