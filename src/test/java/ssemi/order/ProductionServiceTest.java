@@ -51,4 +51,16 @@ class ProductionServiceTest {
             () -> assertEquals(2, job.getProducedQty())
         );
     }
+
+    @Test
+    @DisplayName("생산 완료 시 sample.stock에 targetQty가 추가된다")
+    void 생산_진행_완료_재고증가() {
+        // stock=2, quantity=5, shortage=3, yield=0.9 → targetQty=ceil(3/0.81)=4
+        ProductionJob job = enqueueJob("S001", 2, 5);
+        Sample sample = job.getOrder().getSample();
+
+        productionService.processProduction(job.getTargetQty());
+
+        assertEquals(2 + job.getTargetQty(), sample.getStock());
+    }
 }
