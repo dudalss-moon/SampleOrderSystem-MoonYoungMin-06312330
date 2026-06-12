@@ -17,6 +17,7 @@
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 완료 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 완료 |
 | Phase8 | DB 연동 (H2 JDBC) | [Phase8.md](docs/design/Phase8.md) | 완료 |
+| Phase9 | 테스트 커버리지 보강 | [Phase9.md](docs/design/Phase9.md) | 완료 |
 
 ## 아키텍처 원칙
 - 계층 구조: `ui` → `service` → `domain` → `repository`
@@ -622,9 +623,44 @@ RESERVED → [승인] → 재고 충분  → CONFIRMED → RELEASE
 
 ---
 
-## Phase8 TDD 계획 (현재 진행)
+## Phase9 TDD 계획
 
-### 현재 사이클: 18 / 18
+### 현재 사이클: 9 / 9 (완료)
+
+### [사이클 1] ProductionResultTest — 값 객체 직접 검증 ✅
+- `completed_true_반환` / `job_참조_반환` — PASS
+
+### [사이클 2] InMemory 구현체 엣지케이스 ✅
+- `InMemoryOrderRepositoryTest`: generateId 순번·덮어쓰기·빈 결과·Optional.empty — PASS
+- `InMemoryProductionQueueRepositoryTest`: generateJobId 순번·빈 큐·FIFO·방어적 복사 — PASS
+- `InMemorySampleRepositoryTest`: existsById·existsByName·count·totalStock — PASS
+
+### [사이클 3] InputHandlerTest — 입력 처리 확장 ✅
+- `readString_빈_문자열_반환` / `readString_앞뒤_공백_trim` / `readInt_비숫자_후_재입력` / `readInt_음수_허용` / `readDouble_비숫자_후_재입력` — PASS
+
+### [사이클 4] ConsoleMenuTest — 메인 메뉴 UI ✅
+- `displaySummary_시료_없음` / `displayMainMenu_출력` / `run_종료_선택` / `run_잘못된_선택_후_종료` / `displaySummary_시료_있음` — PASS
+
+### [사이클 5] SampleUITest — 시료 관리 UI ✅
+- 등록 성공·중복 오류·목록 빈/데이터·검색 결과 있음/없음 — PASS
+
+### [사이클 6] OrderUITest — 주문 UI ✅
+- 예약 성공·없는 시료 오류·접수 없음·승인(재고 충분/부족)·거절·잘못된 주문번호 — PASS
+
+### [사이클 7] MonitorUITest — 모니터링 UI ✅
+- 주문 현황 빈/그룹·재고 레이블 여유/고갈 — PASS
+
+### [사이클 8] ProductionUITest — 생산 라인 UI ✅
+- 현재 작업 없음/있음·대기 목록 빈·생산 진행 완료/중간 — PASS
+
+### [사이클 9] ReleaseUITest — 출고 처리 UI ✅
+- 출고 대기 없음·처리 성공·잘못된 주문번호·목록 출력 — PASS
+
+---
+
+## Phase8 TDD 계획
+
+### 현재 사이클: 18 / 18 (완료)
 
 ### [DatabaseConfigTest] 사이클 1: DB 연결 정상 ✅
 - **메서드명:** `데이터베이스_연결_정상` — PASS
