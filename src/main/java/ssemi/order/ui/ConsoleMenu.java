@@ -3,6 +3,7 @@ package ssemi.order.ui;
 import ssemi.order.repository.OrderRepository;
 import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.service.MonitorService;
 import ssemi.order.service.OrderService;
 import ssemi.order.service.ProductionService;
 import ssemi.order.service.SampleService;
@@ -13,6 +14,7 @@ public final class ConsoleMenu {
     private final SampleRepository sampleRepository;
     private final SampleUI sampleUI;
     private final OrderUI orderUI;
+    private final MonitorUI monitorUI;
 
     public ConsoleMenu(InputHandler input, SampleRepository sampleRepository, OrderRepository orderRepository) {
         this.input = input;
@@ -20,6 +22,7 @@ public final class ConsoleMenu {
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
         ProductionService productionService = new ProductionService(new ProductionQueueRepository());
         this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), productionService, input);
+        this.monitorUI = new MonitorUI(new MonitorService(orderRepository, sampleRepository), input);
     }
 
     public void run() {
@@ -64,7 +67,7 @@ public final class ConsoleMenu {
         switch (choice) {
             case 1 -> sampleUI.show();
             case 2 -> orderUI.show();
-            case 3 -> System.out.println("[모니터링] - 준비 중");
+            case 3 -> monitorUI.show();
             case 4 -> System.out.println("[출고 처리] - 준비 중");
             case 5 -> System.out.println("[생산 라인] - 준비 중");
             default -> System.out.println("올바른 메뉴를 선택해주세요.");
