@@ -64,4 +64,14 @@ class OrderTest {
 
         assertFalse(order.isStockDeducted());
     }
+
+    @Test
+    @DisplayName("markStockDeducted() 호출 후 isStockDeducted()는 true를 반환한다")
+    void markStockDeducted_호출_후_true() {
+        Order order = new Order("O001", sampleFixture(), "홍길동", 5);
+
+        order.markStockDeducted();
+
+        assertTrue(order.isStockDeducted());
+    }
 }
