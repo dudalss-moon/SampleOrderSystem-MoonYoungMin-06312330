@@ -7,7 +7,10 @@ import ssemi.order.domain.Order;
 import ssemi.order.domain.OrderStatus;
 import ssemi.order.domain.Sample;
 import ssemi.order.repository.OrderRepository;
+import ssemi.order.repository.ProductionQueueRepository;
 import ssemi.order.repository.SampleRepository;
+import ssemi.order.service.OrderService;
+import ssemi.order.service.ProductionService;
 import ssemi.order.service.ReleaseService;
 
 import java.util.List;
@@ -111,5 +114,25 @@ class ReleaseServiceTest {
         releaseService.release(order.getOrderId());
 
         assertTrue(releaseService.findConfirmed().isEmpty());
+    }
+
+    @Test
+    @DisplayName("재고 충분 경로에서 출고 시 재고는 approve 시 1회만 차감된다")
+    void 전체_흐름_재고충분() {
+        // stock=10, qty=5 → approve(재고 충분 → CONFIRMED, 재고 5 차감) → release()
+        Sample sample = new Sample("S001", "알파센서", 30, 0.9, 10);
+        sampleRepository.save(sample);
+        OrderService orderService = new OrderService(orderRepository, sampleRepository,
+            new ProductionService(new ProductionQueueRepository(), orderRepository));
+
+        Order order = orderService.reserve("S001", "홍길동", 5);
+        orderService.approve(order.getOrderId()); // CONFIRMED, stock=5, stockDeducted=true 이어야 함
+
+        releaseService.release(order.getOrderId());
+
+        assertAll(
+            () -> assertEquals(OrderStatus.RELEASE, order.getStatus()),
+            () -> assertEquals(5, sample.getStock()) // approve 시 1회만 차감
+        );
     }
 }

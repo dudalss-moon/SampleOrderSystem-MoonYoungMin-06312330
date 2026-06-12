@@ -47,6 +47,7 @@ public final class OrderService {
         Order order = findById(orderId);
         if (order.getSample().hasEnoughStock(order.getQuantity())) {
             order.getSample().deductStock(order.getQuantity());
+            order.markStockDeducted();
             order.changeStatus(OrderStatus.CONFIRMED);
         } else {
             order.changeStatus(OrderStatus.PRODUCING);
