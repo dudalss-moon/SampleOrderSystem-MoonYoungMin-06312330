@@ -26,9 +26,10 @@ class OrderServiceTest {
     void setUp() {
         sampleRepository = new SampleRepository();
         productionQueueRepo = new ProductionQueueRepository();
+        OrderRepository orderRepository = new OrderRepository();
         orderService = new OrderService(
-            new OrderRepository(), sampleRepository,
-            new ProductionService(productionQueueRepo)
+            orderRepository, sampleRepository,
+            new ProductionService(productionQueueRepo, orderRepository)
         );
         sampleRepository.save(new Sample("S001", "알파센서", 30, 0.9, 10));
     }
