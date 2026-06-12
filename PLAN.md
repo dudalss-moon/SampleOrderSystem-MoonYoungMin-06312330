@@ -12,7 +12,7 @@
 | Phase1 | 기반 구조 + 메인 메뉴 | [Phase1.md](docs/design/Phase1.md) | 미시작 |
 | Phase2 | 시료 관리 | [Phase2.md](docs/design/Phase2.md) | 미시작 |
 | Phase3 | 시료 주문(예약) | [Phase3.md](docs/design/Phase3.md) | 미시작 |
-| Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 진행중 |
+| Phase4 | 주문 승인/거절 | [Phase4.md](docs/design/Phase4.md) | 완료 |
 | Phase5 | 모니터링 | [Phase5.md](docs/design/Phase5.md) | 미시작 |
 | Phase6 | 생산라인 | [Phase6.md](docs/design/Phase6.md) | 미시작 |
 | Phase7 | 출고처리 | [Phase7.md](docs/design/Phase7.md) | 미시작 |

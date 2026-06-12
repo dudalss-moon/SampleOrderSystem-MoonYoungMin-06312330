@@ -19,7 +19,7 @@ public final class ConsoleMenu {
         this.sampleRepository = sampleRepository;
         this.sampleUI = new SampleUI(new SampleService(sampleRepository), input);
         ProductionService productionService = new ProductionService(new ProductionQueueRepository());
-        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), input);
+        this.orderUI = new OrderUI(new OrderService(orderRepository, sampleRepository, productionService), productionService, input);
     }
 
     public void run() {
