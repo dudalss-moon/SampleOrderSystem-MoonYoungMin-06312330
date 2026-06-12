@@ -44,5 +44,10 @@ public final class ProductionJob {
     public void setStartTime(Instant startTime) { this.startTime = startTime; }
     public void produce(int qty) { this.producedQty += qty; }
 
+    public int calcProducedByElapsed(long elapsedSeconds) {
+        int avgTime = order.getSample().getAvgProductionTime();
+        return Math.min(targetQty, (int) (elapsedSeconds / avgTime));
+    }
+
     public boolean isCompleted() { return producedQty >= targetQty; }
 }
