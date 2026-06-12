@@ -1,13 +1,13 @@
 # S-Semi 반도체 시료생산 주문관리 시스템 — 개발 진행 현황
 
-> 최종 업데이트: 2026-06-12
+> 최종 업데이트: 2026-06-12 (Phase3 완료)
 
 ## 전체 진행률
 
 ```
 Phase1 ██████████ 완료
 Phase2 ██████████ 완료
-Phase3 ░░░░░░░░░░ 미시작
+Phase3 ██████████ 완료
 Phase4 ░░░░░░░░░░ 미시작
 Phase5 ░░░░░░░░░░ 미시작
 Phase6 ░░░░░░░░░░ 미시작
@@ -95,29 +95,41 @@ Phase7 ░░░░░░░░░░ 미시작
 
 ---
 
-### ⬜ Phase3 — 시료 주문(예약) `미시작`
+### ✅ Phase3 — 시료 주문(예약) `완료` (2026-06-12)
 
 | 항목 | 내용 |
 |------|------|
 | 설계 문서 | [Phase3.md](docs/design/Phase3.md) |
-| 테스트 | 0 / 13 |
+| 커밋 | `feat: Phase3 시료 주문(예약) TDD 구현` |
+| 테스트 | 13 / 13 통과 |
 
-**구현 예정 파일**
+**구현 파일**
 
 | 파일 | 역할 |
 |------|------|
-| `domain/Order.java` | changeStatus + 상태 전이 규칙 + 유효성 강화 |
-| `repository/OrderRepository.java` | findById / findByStatus / generateId |
-| `service/OrderService.java` | reserve / findReserved / findAll |
-| `ui/OrderUI.java` | 주문 예약 화면 |
+| `domain/Order.java` | 유효성 검증 + changeStatus 상태 전이 규칙 |
+| `repository/OrderRepository.java` | LinkedHashMap 기반, findById / findByStatus / generateId |
+| `service/OrderService.java` | reserve (시료 존재 검증) / findReserved / findAll / findById |
+| `ui/OrderUI.java` | 주문 예약 / 접수 목록 화면 |
+| `ui/ConsoleMenu.java` | 메뉴 2번 OrderUI 라우팅 연결 |
 
-**예정 테스트 케이스 (13건)**
+**TDD 테스트 케이스**
 
-| 클래스 | 테스트 수 | 주요 검증 |
-|--------|----------|----------|
-| `OrderTest` | 5 | 초기상태, 상태전이, 비허용전이 예외, 유효성 |
-| `OrderRepositoryTest` | 4 | save/findById/findByStatus/generateId |
-| `OrderServiceTest` | 4 | reserve, 시료없음 예외, 수량 예외, RESERVED 목록 |
+| # | 클래스 | 테스트 메서드 | 결과 |
+|---|--------|--------------|------|
+| 1 | `OrderTest` | `주문_생성_초기상태_RESERVED` | ✅ PASS |
+| 2 | `OrderTest` | `주문_상태_정상_전이` | ✅ PASS |
+| 3 | `OrderTest` | `주문_상태_비허용_전이_예외` | ✅ PASS |
+| 4 | `OrderTest` | `주문_수량_0이하_예외` | ✅ PASS |
+| 5 | `OrderTest` | `고객명_공백_예외` | ✅ PASS |
+| 6 | `OrderRepositoryTest` | `주문_저장_후_ID로_조회` | ✅ PASS |
+| 7 | `OrderRepositoryTest` | `상태별_주문_조회` | ✅ PASS |
+| 8 | `OrderRepositoryTest` | `ID_자동생성_순번_증가` | ✅ PASS |
+| 9 | `OrderRepositoryTest` | `전체_주문_조회_등록순_보장` | ✅ PASS |
+| 10 | `OrderServiceTest` | `정상_주문_예약` | ✅ PASS |
+| 11 | `OrderServiceTest` | `존재하지않는_시료_주문_예외` | ✅ PASS |
+| 12 | `OrderServiceTest` | `수량_0이하_예약_예외` | ✅ PASS |
+| 13 | `OrderServiceTest` | `RESERVED_주문_목록_조회` | ✅ PASS |
 
 ---
 
@@ -226,12 +238,12 @@ Phase7 ░░░░░░░░░░ 미시작
 |-------|------------|------|------|--------|
 | Phase1 | `Phase1Test` | 7 | 7 | 100% |
 | Phase2 | `SampleTest`, `SampleRepositoryTest`, `SampleServiceTest` | 17 | 17 | 100% |
-| Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 0 | 13 | 0% |
+| Phase3 | `OrderTest`, `OrderRepositoryTest`, `OrderServiceTest` | 13 | 13 | 100% |
 | Phase4 | `ProductionJobTest`, `ProductionQueueRepositoryTest`, `OrderServiceTest` | 0 | 14 | 0% |
 | Phase5 | `StockStatusTest`, `MonitorServiceTest` | 0 | 11 | 0% |
 | Phase6 | `ProductionServiceTest` | 0 | 9 | 0% |
 | Phase7 | `ReleaseServiceTest` | 0 | 10 | 0% |
-| **합계** | | **24** | **81** | **30%** |
+| **합계** | | **37** | **81** | **46%** |
 
 ---
 
