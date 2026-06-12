@@ -83,4 +83,15 @@ class ProductionServiceTest {
 
         assertTrue(productionService.getCurrentJob().isEmpty());
     }
+
+    @Test
+    @DisplayName("2개 작업 등록 후 첫 번째 완료 시 다음 작업을 peek할 수 있다")
+    void 생산_완료_다음_작업_자동시작() {
+        ProductionJob job1 = enqueueJob("S001", 0, 4);
+        ProductionJob job2 = enqueueJob("S002", 0, 4);
+
+        productionService.processProduction(job1.getTargetQty());
+
+        assertEquals(job2, productionService.getCurrentJob().get());
+    }
 }
