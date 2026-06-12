@@ -75,6 +75,21 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("재고가 부족할 때 approve 호출 시 주문 상태가 PRODUCING으로 변경되고 생산큐에 등록된다")
+    void 재고_부족_승인_PRODUCING() {
+        // stock=10, quantity=15 → 재고 부족
+        sampleRepository.save(new Sample("S002", "베타칩", 20, 0.9, 10));
+        Order order = orderService.reserve("S002", "김철수", 15);
+
+        Order approved = orderService.approve(order.getOrderId());
+
+        assertAll(
+            () -> assertEquals(OrderStatus.PRODUCING, approved.getStatus()),
+            () -> assertEquals(1, productionQueueRepo.getQueue().size())
+        );
+    }
+
+    @Test
     @DisplayName("findReserved는 RESERVED 상태 주문만 반환한다")
     void RESERVED_주문_목록_조회() {
         orderService.reserve("S001", "홍길동", 5);
